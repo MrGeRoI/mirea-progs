@@ -7,8 +7,22 @@ include("../lib/stdrobot.jl")
 
 #отрисовать двойную рамку и вернуться на место
 function makedoubleframe!(robot::Robot)
-    n = numsteps!(robot,Ost)
-    m = numsteps!(robot,Sud)
+    n = 0
+    m = 0
+	
+	while !isborder(robot,Sud) || !isborder(robot,Ost)
+		if !isborder(robot,Ost)
+			move!(robot,Ost)
+
+			n += 1
+		end
+
+		if !isborder(robot,Sud)
+			move!(robot,Sud)
+
+			m += 1
+		end
+	end
 
     for side in (HorizonSide(i) for i in 0:3)
         putmarkers!(robot,side)
