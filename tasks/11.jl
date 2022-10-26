@@ -5,6 +5,10 @@ include("../lib/stdrobot.jl")
 #	
 #	       Sud
 
+#=
+	ДАНО: Робот - в произвольной клетке ограниченного прямоугольного поля, на поле расставлены горизонтальные перегородки различной длины (перегорки длиной в несколько клеток, считаются одной перегородкой), не касающиеся внешней рамки.
+	РЕЗУЛЬТАТ: Робот — в исходном положении, подсчитано и возвращено число всех перегородок на поле.
+=#
 
 function numborders!(robot::Robot,side::HorizonSide)
     num_borders = 0
@@ -25,7 +29,8 @@ function numborders!(robot::Robot,side::HorizonSide)
 
     return num_borders
 end
-#закрасить поле в шахматном порядке
+
+#посчитать границы
 function numborders!(robot::Robot)
 	while !isborder(robot,Sud) || !isborder(robot,West)
 		if !isborder(robot,West)
@@ -38,7 +43,6 @@ function numborders!(robot::Robot)
 	end
 
     num_borders = 0
-    b = false
     side = Ost
     while !isborder(robot,side) || !isborder(robot,Nord)
         num_borders += numborders!(robot,side)

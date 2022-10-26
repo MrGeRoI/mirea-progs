@@ -5,6 +5,12 @@ include("../lib/stdrobot.jl")
 #	
 #	       Sud
 
+#=
+	ДАНО: Робот - рядом с горизонтальной бесконечно продолжающейся 
+	в обе стороны перегородкой (под ней), в которой имеется проход шириной в одну клетку.
+	РЕЗУЛЬТАТ: Робот - в клетке под проходом
+=#
+
 #найти дырку в бесконечной перегородке с отверстием
 function findhole!(robot::Robot)
 	along!(robot,Nord)
@@ -13,12 +19,10 @@ function findhole!(robot::Robot)
 	num = 1
 
 	while isborder(robot,Nord)
-		for _ in 1:num
-			if !isborder(robot,Nord) break end
-
-			move!(robot,side)
+		along!(robot,side,num) do r::Robot
+			return !isborder(r,Nord)
 		end
-		
+
 		side = inverse(side)
 		num += 1
 	end
@@ -27,6 +31,6 @@ function findhole!(robot::Robot)
 end
 
 # Тест
-robot = Robot("7.sit",animate=true)
+robot = Robot("tasks/7.sit",animate=true)
 
 findhole!(robot)
