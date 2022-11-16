@@ -4,11 +4,19 @@ using HorizonSideRobots
 
 #		ебаный компас
 #
-#	      Nord	
+#	         Nord (0)
 #
-#	West    O	  Ost
+#	West (1)   X   Ost (3)
 #	
-#	       Sud
+#	          Sud (2)
+
+# Сторона света в координату X
+tox(side::HorizonSide) =
+	Int(side) % 2 == 0 ? 0 : Int(side) - 2
+
+# Сторона света в координату Y
+toy(side::HorizonSide) =
+	Int(side) % 2 == 0 ? Int(side) - 1 : 0
 
 #обратное направление
 inverse(side::HorizonSide) =
@@ -19,8 +27,8 @@ left(side::HorizonSide) =
 	HorizonSide( ( Int(side) + 1 ) % 4 )
 
 #повернуть направо
-right(side::HorizonSide) = 
-	HorizonSide( ( Int(side) - 1 ) % 4 )
+right(side::HorizonSide) =
+	Int(side) < 1 ? HorizonSide(3) : HorizonSide( Int(side) - 1 )
 
 #пройти до упора в направлении
 along!(robot::Robot,side::HorizonSide) =
@@ -48,6 +56,16 @@ end
 function numsteps!(robot::Robot,side::HorizonSide)
     num_steps = 0
     while !isborder(robot,side)
+        move!(robot,side)
+        num_steps += 1
+    end
+    num_steps
+end
+
+#идти до функции и считать шаги
+function numsteps!(stop_condition::Function,robot::Robot,side::HorizonSide)
+    num_steps = 0
+    while !isborder(robot,side) && !stop_condition(robot)
         move!(robot,side)
         num_steps += 1
     end
