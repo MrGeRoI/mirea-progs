@@ -9,4 +9,4 @@ mutable struct SpiralRobot{TypeRobot <: AbstractRobot} <: AbstractRobot
 end
 
 get_robot(spiral::SpiralRobot)::Robot =
-	spiral.robot
+	get_robot(spiral.robot)

@@ -7,8 +7,8 @@ mutable struct CoordRobot{TypeRobot <: AbstractRobot} <: AbstractRobot
 	y::Int
 
 	CoordRobot{TypeRobot}(robot::TypeRobot) where {TypeRobot <: AbstractRobot} = begin
-		set_x = robot.situation.robot_position[1]
-		set_y = robot.situation.robot_position[2]
+		set_x = get_robot(robot).situation.robot_position[1]
+		set_y = get_robot(robot).situation.robot_position[2]
 
 		new(robot,set_x,set_y)
 	end
@@ -19,7 +19,7 @@ mutable struct CoordRobot{TypeRobot <: AbstractRobot} <: AbstractRobot
 end
 
 get_robot(coord::CoordRobot)::Robot =
-	coord.robot
+	get_robot(coord.robot)
 
 get_coord(coord::CoordRobot)::Tuple{Int,Int} =
 	coord.robot.situation.robot_position
@@ -29,9 +29,6 @@ get_x(coord::CoordRobot)::Tuple{Int,Int} =
 
 get_y(coord::CoordRobot)::Tuple{Int,Int} =
 	coord.robot.situation.robot_position[2]
-
-get_robot(coord::CoordRobot) =
-	coord.robot
 
 HorizonSideRobots.move!(coord::CoordRobot,side::HorizonSide)::Nothing = begin
 	move!(coord.robot,side)
@@ -62,6 +59,6 @@ shift!(coord::CoordRobot,x::Int,y::Int)::Nothing = begin
 	end
 end
 
-goto!(coord::CoordRobot,x::Int,y::Int) = begin
-	move!(coord,(x > coord.x ? 1 : -1) * abs(x - coord.x),(y > coord.y ? 1 : -1)*abs(y - coord.y))
+goto!(coord::CoordRobot,x::Int,y::Int)::Nothing = begin
+	shift!(coord,(x > coord.x ? 1 : -1) * abs(x - coord.x),(y > coord.y ? 1 : -1)*abs(y - coord.y))
 end

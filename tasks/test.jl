@@ -1,6 +1,18 @@
-using HorizonSideRobots
+include("../lib/coordrobot.jl")
+include("../lib/edgerobot.jl")
+include("../lib/spiralrobot.jl")
+include("../lib/simplerobot.jl")
 
-left(side::HorizonSide)::HorizonSide = HorizonSide(mod(Int(side)-1, 4))
-right(side::HorizonSide)::HorizonSide = HorizonSide(mod(Int(side)+1, 4))
+supermegarobot =
+	CoordRobot{EdgeRobot{SpiralRobot{SimpleRobot}}}(
+		EdgeRobot{SpiralRobot{SimpleRobot}}(
+			SpiralRobot{SimpleRobot}(
+				SimpleRobot(
+					Robot(animate = true)
+				)
+			),Sud
+		)
+	)
 
-print(right(Nord))
+println(supermegarobot)
+println(get_robot(supermegarobot))

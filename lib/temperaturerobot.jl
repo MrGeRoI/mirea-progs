@@ -10,8 +10,8 @@ mutable struct TemperatureRobot{TypeRobot <: AbstractRobot} <: AbstractRobot
 end
 
 get_robot(temperature::TemperatureRobot)::Robot =
-	temperature.robot
-	
+	get_robot(temperature.robot)
+
 get_temperature(temperature::TemperatureRobot) =
 	temperature.temperature
 

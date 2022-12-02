@@ -229,6 +229,3 @@ function shatl!(stop_condition::Function, robot::Robot)
 		#move!(robot,) куда?
 	end
 end
-
-get_robot(robot::Robot) =
-	robot
