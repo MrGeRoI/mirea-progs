@@ -2,7 +2,7 @@ using HorizonSideRobots
 
 # ЗАИНКЛЮДЬ МЕНЯ 🥵
 
-#		ебаный компас
+#		ср@ный компас
 #
 #	         Nord (0)
 #
@@ -11,41 +11,41 @@ using HorizonSideRobots
 #	          Sud (2)
 
 # Сторона света в координату X
-tox(side::HorizonSide) =
+tox(side::HorizonSide)::Integer =
 	Int(side) % 2 == 0 ? 0 : Int(side) - 2
 
 # Сторона света в координату Y
-toy(side::HorizonSide) =
+toy(side::HorizonSide)::Integer =
 	Int(side) % 2 == 0 ? Int(side) - 1 : 0
 
 #обратное направление
-inverse(side::HorizonSide) =
+inverse(side::HorizonSide)::HorizonSide =
     HorizonSide( ( Int(side) + 2 ) % 4 )
 
 #повернуть налево
-left(side::HorizonSide) = 
+left(side::HorizonSide)::HorizonSide = 
 	HorizonSide( ( Int(side) + 1 ) % 4 )
 
 #повернуть направо
-right(side::HorizonSide) =
+right(side::HorizonSide)::HorizonSide =
 	Int(side) < 1 ? HorizonSide(3) : HorizonSide( Int(side) - 1 )
 
 #пройти до упора в направлении
-along!(robot::Robot,side::HorizonSide) =
+along!(robot::Robot,side::HorizonSide)::Nothing =
     while !isborder(robot,side)
         move!(robot,side)
     end
 
 #пройти в направлении с указаным количеством шагов
-along!(robot::Robot,side::HorizonSide,num_steps::Integer) =
+along!(robot::Robot,side::HorizonSide,num_steps::Integer)::Nothing =
     for _ in 1:num_steps move!(robot,side) end
 	
 #пройти в направлении пока функция не вернёт true 
-along!(stop_condition::Function,robot::Robot,side::HorizonSide) =
+along!(stop_condition::Function,robot::Robot,side::HorizonSide)::Nothing =
 	while stop_condition(robot) move!(robot,side) end
 
 #пройти в направлении пока функция не вернёт true или не кончатся шаги
-function along!(stop_condition::Function,robot::Robot,side::HorizonSide,num_steps::Integer)
+function along!(stop_condition::Function,robot::Robot,side::HorizonSide,num_steps::Integer)::Nothing
 	for _ in 1:num_steps
 		if stop_condition(robot) return end
 		move!(robot,side)
@@ -53,7 +53,7 @@ function along!(stop_condition::Function,robot::Robot,side::HorizonSide,num_step
 end
 
 #идти до упора и считать шаги
-function numsteps!(robot::Robot,side::HorizonSide)
+function numsteps!(robot::Robot,side::HorizonSide)::Integer
     num_steps = 0
     while !isborder(robot,side)
         move!(robot,side)
@@ -63,7 +63,7 @@ function numsteps!(robot::Robot,side::HorizonSide)
 end
 
 #идти до функции и считать шаги
-function numsteps!(stop_condition::Function,robot::Robot,side::HorizonSide)
+function numsteps!(stop_condition::Function,robot::Robot,side::HorizonSide)::Integer
     num_steps = 0
     while !isborder(robot,side) && !stop_condition(robot)
         move!(robot,side)
@@ -75,7 +75,7 @@ end
 #идти до упора и расставить маркеры
 # 1. Делаем шаг
 # 2. Ставим маркер
-function putmarkers!(robot::Robot,side::HorizonSide)
+function putmarkers!(robot::Robot,side::HorizonSide)::Nothing
     while !isborder(robot,side)
         move!(robot,side)
         putmarker!(robot)
@@ -138,8 +138,97 @@ function spiral!(stop_condition::Function,robot::Robot,side::HorizonSide = Ost)
 	end
 end
 
+# return: Сдвиг по x, сдвиг по y, число поворотА
+function maze!(robot::Robot,side::HorizonSide)::Tuple{Int,Int,Int}
+	rotate_number = 0
+
+	move_x = 0
+	move_y = 0
+
+	while true
+		if isborder(robot,side) && !isborder(robot,right(side))
+			move!(robot,right(side))
+
+			move_x = move_x + tox(right(side))
+			move_y = move_y + toy(right(side))
+
+			if abs(rotate_number) >= 4 && move_x == 0 && move_y == 0 return (move_x,move_y,rotate_number) end
+		elseif !isborder(robot,side) || isborder(robot,right(side))
+			if !isborder(robot,side)
+				move!(robot,side)
+
+				move_x = move_x + tox(side)
+				move_y = move_y + toy(side)
+
+				side = left(side)
+
+				rotate_number = rotate_number - 1
+			elseif isborder(robot,right(side))
+				side = right(side)
+
+				rotate_number = rotate_number + 1
+			end
+
+			if abs(rotate_number) >= 4 && move_x == 0 && move_y == 0 return (move_x,move_y,rotate_number) end
+		end
+
+		if move_x == 0 && move_y == 0 && abs(rotate_number) >= 4
+			break
+		end
+	end
+
+	#смещение по x, смещение по y, число поворотА
+	(move_x,move_y,rotate_number)
+end
+
+# return: Сдвиг по x, сдвиг по y, число поворотА
+function maze!(stop_condition::Function,robot::Robot,side::HorizonSide)::Tuple{Int,Int,Int}
+	rotate_number = 0
+
+	move_x = 0
+	move_y = 0
+
+	while true
+		if isborder(robot,side) && !isborder(robot,right(side))
+			move!(robot,right(side))
+
+			move_x = move_x + tox(right(side))
+			move_y = move_y + toy(right(side))
+
+			if abs(rotate_number) >= 4 && move_x == 0 && move_y == 0 return (move_x,move_y,rotate_number) end
+		elseif !isborder(robot,side) || isborder(robot,right(side))
+			if !isborder(robot,side)
+				move!(robot,side)
+
+				move_x = move_x + tox(side)
+				move_y = move_y + toy(side)
+
+				side = left(side)
+
+				rotate_number = rotate_number - 1
+			elseif isborder(robot,right(side))
+				side = right(side)
+
+				rotate_number = rotate_number + 1
+			end
+
+			if abs(rotate_number) >= 4 && move_x == 0 && move_y == 0 return (move_x,move_y,rotate_number) end
+		end
+
+		# Робот, сторона движения, смещение по x, смещение по y, число поворотА
+		if stop_condition(robot,side,move_x,move_y,rotate_number)
+			return (move_x,move_y,rotate_number)
+		end
+	end
+
+	(move_x,move_y,rotate_number)
+end
+
 function shatl!(stop_condition::Function, robot::Robot)
 	while !stop_condition(robot)
 		#move!(robot,) куда?
 	end
 end
+
+get_robot(robot::Robot) =
+	robot
