@@ -8,4 +8,4 @@ mutable struct SimpleRobot <: AbstractRobot
 end
 
 get_robot(simple::SimpleRobot)::Robot =
-	get_robot(simple.robot)
+	simple.robot

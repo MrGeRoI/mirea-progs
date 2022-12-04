@@ -15,4 +15,4 @@ supermegarobot =
 	)
 
 println(supermegarobot)
-println(get_robot(supermegarobot))
+println(get_native_robot(supermegarobot))

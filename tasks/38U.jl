@@ -1,4 +1,4 @@
-include("../lib/morerobot.jl")
+include("../lib/unirobot.jl")
 
 #	      Nord	
 #
@@ -29,9 +29,8 @@ edge = EdgeRobot(robot,Ost)
 coord = CoordRobot{Robot}(robot,0,0)
 print("B: ")
 println(checkinsidemaze!(edge,coord) ? "внутри" : "снаружи")
-#=
+
 robot = Robot("38C.sit",animate=true)
 edge = EdgeRobot(robot,Sud)
 print("C: ")
 println(checkinsidemaze!(edge) ? "внутри" : "снаружи")
-=#

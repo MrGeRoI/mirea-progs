@@ -4,26 +4,31 @@ abstract type AbstractRobot end
 
 get_robot(robot::Robot)::Robot = robot
 
-HorizonSideRobots.move!(simple::AbstractRobot,side::HorizonSide)::Nothing =
-	move!(get_robot(simple),side)
+get_native_robot(robot::Robot)::Robot = robot
 
-HorizonSideRobots.isborder(simple::AbstractRobot,side::HorizonSide)::Bool =
-	isborder(get_robot(simple),side)
+get_native_robot(abstract::AbstractRobot)::Robot =
+	get_native_robot(get_robot(abstract))
 
-HorizonSideRobots.putmarker!(simple::AbstractRobot)::Nothing =
-	putmarker!(get_robot(simple))
+HorizonSideRobots.move!(abstract::AbstractRobot,side::HorizonSide)::Nothing =
+	move!(get_robot(abstract),side)
 
-HorizonSideRobots.ismarker(simple::AbstractRobot)::Bool =
-	ismarker(get_robot(simple))
+HorizonSideRobots.isborder(abstract::AbstractRobot,side::HorizonSide)::Bool =
+	isborder(get_robot(abstract),side)
 
-HorizonSideRobots.temperature(simple::AbstractRobot)::Int =
-	temperature(get_robot(simple))
+HorizonSideRobots.putmarker!(abstract::AbstractRobot)::Nothing =
+	putmarker!(get_robot(abstract))
 
-HorizonSideRobots.show(simple::AbstractRobot)::Nothing =
-	show(get_robot(simple))
+HorizonSideRobots.ismarker(abstract::AbstractRobot)::Bool =
+	ismarker(get_robot(abstract))
 
-HorizonSideRobots.show!(simple::AbstractRobot)::Nothing =
-	show!(get_robot(simple))
+HorizonSideRobots.temperature(abstract::AbstractRobot)::Int =
+	temperature(get_robot(abstract))
 
-HorizonSideRobots.save(simple::AbstractRobot,file::AbstractString)::Nothing =
-	save(get_robot(simple),file)
+HorizonSideRobots.show(abstract::AbstractRobot)::Nothing =
+	show(get_robot(abstract))
+
+HorizonSideRobots.show!(abstract::AbstractRobot)::Nothing =
+	show!(get_robot(abstract))
+
+HorizonSideRobots.save(abstract::AbstractRobot,file::AbstractString)::Nothing =
+	save(get_robot(abstract),file)

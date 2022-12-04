@@ -7,8 +7,8 @@ mutable struct CoordRobot{TypeRobot <: AbstractRobot} <: AbstractRobot
 	y::Int
 
 	CoordRobot{TypeRobot}(robot::TypeRobot) where {TypeRobot <: AbstractRobot} = begin
-		set_x = get_robot(robot).situation.robot_position[1]
-		set_y = get_robot(robot).situation.robot_position[2]
+		set_x = get_native_robot(robot).situation.robot_position[1]
+		set_y = get_native_robot(robot).situation.robot_position[2]
 
 		new(robot,set_x,set_y)
 	end
@@ -18,8 +18,8 @@ mutable struct CoordRobot{TypeRobot <: AbstractRobot} <: AbstractRobot
 	CoordRobot() = CoordRobot{Robot}(Robot(animate = true))
 end
 
-get_robot(coord::CoordRobot)::Robot =
-	get_robot(coord.robot)
+get_robot(coord::CoordRobot)::AbstractRobot =
+	coord.robot
 
 get_coord(coord::CoordRobot)::Tuple{Int,Int} =
 	coord.robot.situation.robot_position

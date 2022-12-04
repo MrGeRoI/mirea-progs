@@ -11,8 +11,8 @@ mutable struct EdgeRobot{TypeRobot <: AbstractRobot} <: AbstractRobot
 	EdgeRobot(side::HorizonSide) = EdgeRobot{Robot}(Robot(animate=true),side)
 end
 
-get_robot(edge::EdgeRobot)::Robot =
-	get_robot(edge.robot)
+get_robot(edge::EdgeRobot)::AbstractRobot =
+	edge.robot
 	
 get_edge_side(edge::EdgeRobot)::HorizonSide =
     edge.edge_side
