@@ -28,7 +28,7 @@ left(side::HorizonSide)::HorizonSide =
 
 #повернуть направо
 right(side::HorizonSide)::HorizonSide =
-	Int(side) < 1 ? HorizonSide(3) : HorizonSide( Int(side) - 1 )
+	HorizonSide( mod( Int(side) - 1 , 4 ) )
 
 #пройти до упора в направлении
 along!(robot::Robot,side::HorizonSide)::Nothing =

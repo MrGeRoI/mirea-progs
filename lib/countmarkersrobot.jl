@@ -9,7 +9,7 @@ mutable struct CountMarkersRobot{TypeRobot <: AbstractRobot} <: AbstractRobot
 	CountMarkersRobot() = CountMarkersRobot{Robot}(Robot(animate = true))
 end
 
-get_robot(counter::CountMarkesrRobot)::AbstractRobot =
+get_robot(counter::CountMarkersRobot)::AbstractRobot =
 	counter.robot
 
 get_counter(counter::CountMarkersRobot)::Integer = counter.count

@@ -13,24 +13,19 @@ include("../lib/unirobot.jl")
  
 # Стена всегда СЛЕВА от робота!
 # side - текущее направление стены от робота
-checkinsidemaze!(edge::EdgeRobot,coord::CoordRobot) =
-	countrotatesmaze!(edge,coord) > 0
+checkinsidemaze!(edgecoord::EdgeRobot{CoordRobot})::Bool =
+	countrotatesmaze!(edgecoord) > 0
 
 # Тест
- 
-robot = Robot("38A.sit",animate=true)
-edge = EdgeRobot(robot,West)
-coord = CoordRobot{Robot}(robot,0,0)
-print("A: ")
-println(checkinsidemaze!(edge,coord) ? "внутри" : "снаружи")
- 
-robot = Robot("38B.sit",animate=true)
-edge = EdgeRobot(robot,Ost)
-coord = CoordRobot{Robot}(robot,0,0)
-print("B: ")
-println(checkinsidemaze!(edge,coord) ? "внутри" : "снаружи")
 
-robot = Robot("38C.sit",animate=true)
-edge = EdgeRobot(robot,Sud)
+edgecoord = EdgeRobot{CoordRobot}(CoordRobot{SimpleRobot}(SimpleRobot(Robot("situations/38A.sit",animate=true))),West)
+print("A: ")
+println(checkinsidemaze!(edgecoord) ? "внутри" : "снаружи")
+ 
+edgecoord = EdgeRobot{CoordRobot}(CoordRobot{SimpleRobot}(SimpleRobot(Robot("situations/38B.sit",animate=true))),Ost)
+print("B: ")
+println(checkinsidemaze!(edgecoord) ? "внутри" : "снаружи")
+
+edgecoord = EdgeRobot{CoordRobot}(CoordRobot{SimpleRobot}(SimpleRobot(Robot("situations/38C.sit",animate=true))),Sud)
 print("C: ")
-println(checkinsidemaze!(edge) ? "внутри" : "снаружи")
+println(checkinsidemaze!(edgecoord) ? "внутри" : "снаружи")
