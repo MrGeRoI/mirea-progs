@@ -85,7 +85,7 @@ end
 #идти до упора и расставить маркеры с указаным количеством шагов
 # 1. Делаем шаг
 # 2. Ставим маркер
-function putmarkers!(robot::Robot,side::HorizonSide,num_steps::Integer)
+function putmarkers!(robot::Robot,side::HorizonSide,num_steps::Integer)::Nothing
 	for _ in 1:num_steps
 		move!(robot,side)
 		putmarker!(robot)
@@ -93,7 +93,7 @@ function putmarkers!(robot::Robot,side::HorizonSide,num_steps::Integer)
 end
 
 #идти до упора, расставить маркеры и посчитать шаги
-function numsteps_putmarkers!(robot::Robot,side::HorizonSide)
+function numsteps_putmarkers!(robot::Robot,side::HorizonSide)::Int
     num_steps = 0
     while !isborder(robot,side)
         move!(robot,side)
@@ -104,14 +104,14 @@ function numsteps_putmarkers!(robot::Robot,side::HorizonSide)
 end
 
 #расставить маркеры вдоль границы и сделать шаг дальше
-function putmarkers_border!(robot::Robot,borderSide::HorizonSide,move_side::HorizonSide)
+function putmarkers_border!(robot::Robot,borderSide::HorizonSide,move_side::HorizonSide)::Nothing
 	while isborder(robot,borderSide)
 		putmarker!(robot)
 		move!(robot,move_side)
 	end
 end
 
-function snake!(robot::Robot,move_side::HorizonSide,next_row_side::HorizonSide)
+function snake!(robot::Robot,move_side::HorizonSide,next_row_side::HorizonSide)::Nothing
 	while !isborder(robot,move_side)
 		along!(robot,move_side)
 
@@ -123,7 +123,7 @@ function snake!(robot::Robot,move_side::HorizonSide,next_row_side::HorizonSide)
 end
 
 #двигаться по спирали
-function spiral!(stop_condition::Function,robot::Robot,side::HorizonSide = Ost)
+function spiral!(stop_condition::Function,robot::Robot,side::HorizonSide = Ost)::Nothing
 	dist = 1
 
 	while true
@@ -224,7 +224,7 @@ function maze!(stop_condition::Function,robot::Robot,side::HorizonSide)::Tuple{I
 	(move_x,move_y,rotate_number)
 end
 
-function shatl!(stop_condition::Function, robot::Robot)
+function shatl!(stop_condition::Function, robot::Robot)::Nothing
 	while !stop_condition(robot)
 		#move!(robot,) куда?
 	end

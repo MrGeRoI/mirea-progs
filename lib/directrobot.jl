@@ -31,7 +31,7 @@ mutable struct DirectRobot{TypeRobot <: AbstractRobot} <: AbstractRobot
 
 	DirectRobot{TypeRobot}(robot::TypeRobot,dir::HorizonSide) where {TypeRobot <: AbstractRobot} = new(robot,dir)
 
-	DirectRobot(dir::HorizonSide) = DirectRobot{Robot}(Robot(animate = true),dir)
+	DirectRobot(dir::HorizonSide) = DirectRobot{SimpleRobot}(SimpleRobot(),dir)
 end
 
 get_robot(direct::DirectRobot)::AbstractRobot =

@@ -6,7 +6,7 @@ mutable struct TemperatureRobot{TypeRobot <: AbstractRobot} <: AbstractRobot
 
 	TemperatureRobot{TypeRobot}(robot::TypeRobot,temp::Integer = 0) where {TypeRobot <: AbstractRobot} = new(robot,temp)
 
-	TemperatureRobot() = TemperatureRobot{Robot}(Robot(animate = true))
+	TemperatureRobot() = TemperatureRobot{SimpleRobot}(SimpleRobot())
 end
 
 get_robot(temperature::TemperatureRobot)::AbstractRobot =

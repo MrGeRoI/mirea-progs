@@ -8,7 +8,7 @@ mutable struct CoordRobot{TypeRobot <: AbstractRobot} <: AbstractRobot
 
 	CoordRobot{TypeRobot}(robot::TypeRobot,x::Int = 0,y::Int = 0) where {TypeRobot <: AbstractRobot} = new(robot,x,y)
 
-	CoordRobot() = CoordRobot{Robot}(Robot(animate = true))
+	CoordRobot() = CoordRobot{SimpleRobot}(SimpleRobot())
 end
 
 get_robot(coord::CoordRobot)::AbstractRobot =

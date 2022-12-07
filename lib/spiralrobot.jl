@@ -5,7 +5,7 @@ mutable struct SpiralRobot{TypeRobot <: AbstractRobot} <: AbstractRobot
 
 	SpiralRobot{TypeRobot}(robot::TypeRobot) where {TypeRobot <: AbstractRobot} = new(robot)
 
-	SpiralRobot() = SpiralRobot{Robot}(Robot(animate = true))
+	SpiralRobot() = SpiralRobot{SimpleRobot}(SimpleRobot())
 end
 
 get_robot(spiral::SpiralRobot)::AbstractRobot =

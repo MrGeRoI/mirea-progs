@@ -1,5 +1,6 @@
 include("coordrobot.jl")
 include("countmarkersrobot.jl")
+#include("directrobot.jl")
 include("edgerobot.jl")
 include("spiralrobot.jl")
 include("temperaturerobot.jl")
@@ -11,7 +12,7 @@ function countrotatesmaze!(edgecoord::EdgeRobot{CoordRobot})::Int
 
 	rotate = 0
 
-	while abs(rotate) < 4 || now_coord[1] != start_coord[1] || now_coord[2] != start_coord[2]
+	while abs(rotate) < 4 || now_coord != start_coord
 		result = forward!(edgecoord)
 
 		rotate = rotate + result[2]

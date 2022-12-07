@@ -1,7 +1,4 @@
-include("../lib/coordrobot.jl")
-include("../lib/edgerobot.jl")
-include("../lib/spiralrobot.jl")
-include("../lib/simplerobot.jl")
+include("../lib/unirobot.jl")
 
 supermegarobot =
 	CoordRobot{EdgeRobot{SpiralRobot{SimpleRobot}}}(

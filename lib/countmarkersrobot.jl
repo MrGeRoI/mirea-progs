@@ -6,7 +6,7 @@ mutable struct CountMarkersRobot{TypeRobot <: AbstractRobot} <: AbstractRobot
 
 	CountMarkersRobot{TypeRobot}(robot::TypeRobot) where {TypeRobot <: AbstractRobot} = new(robot)
 
-	CountMarkersRobot() = CountMarkersRobot{Robot}(Robot(animate = true))
+	CountMarkersRobot() = CountMarkersRobot{SimpleRobot}(SimpleRobot())
 end
 
 get_robot(counter::CountMarkersRobot)::AbstractRobot =
