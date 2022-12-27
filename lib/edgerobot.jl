@@ -1,35 +1,32 @@
-include("directrobot.jl")
+include("turnrobot.jl")
 
 mutable struct EdgeRobot{TypeRobot <: AbstractRobot} <: AbstractRobot
-	direct::DirectRobot{TypeRobot}
+	turn::TurnRobot{TypeRobot}
 
     edge_side::HorizonSide
 
-	EdgeRobot{TypeRobot}(robot::TypeRobot,side::HorizonSide) where {TypeRobot <: AbstractRobot} = new(DirectRobot{TypeRobot}(robot,right(side)),side)
+	EdgeRobot{TypeRobot}(robot::TypeRobot,side::HorizonSide) where {TypeRobot <: AbstractRobot} = new(TurnRobot{TypeRobot}(robot,right(side)),side)
 
 	EdgeRobot(side::HorizonSide) = EdgeRobot{SimpleRobot}(SimpleRobot(),side)
 end
 
 get_robot(edge::EdgeRobot)::AbstractRobot =
-	get_robot(edge.direct)
+	get_robot(edge.turn)
+
+get_rotates(edge::EdgeRobot)::Int =
+	get_turns(edge.turn)
 	
 get_edge_side(edge::EdgeRobot)::HorizonSide =
     edge.edge_side
  
-function forward!(edge::EdgeRobot)::Tuple{HorizonSide,Int}
-	turn!(edge.direct,Left)
+function forward!(edge::EdgeRobot)::Nothing
+	turn!(edge.turn,Left)
 	
-	rotate = -1
-
-	while !try_forward!(edge.direct)
-		turn!(edge.direct,Right)
-
-		rotate = rotate + 1
+	while !try_forward!(edge.turn)
+		turn!(edge.turn,Right)
 	end
-
-	return (get_direction(edge.direct),rotate)
 end
 
-function backward!(edge::EdgeRobot)::Tuple{HorizonSide,Int}
+function backward!(edge::EdgeRobot)::Nothing
     # TODO
 end

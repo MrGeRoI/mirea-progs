@@ -1,11 +1,13 @@
 include("../lib/unirobot.jl")
 
 supermegarobot =
-	CoordRobot{EdgeRobot{SpiralRobot{SimpleRobot}}}(
-		EdgeRobot{SpiralRobot{SimpleRobot}}(
-			SpiralRobot{SimpleRobot}(
-				SimpleRobot(
-					Robot(animate = true)
+	CoordRobot{EdgeRobot}(
+		EdgeRobot{SpiralRobot}(
+			SpiralRobot{TemperatureRobot}(
+				TemperatureRobot{SimpleRobot}(
+					SimpleRobot(
+						Robot(animate = true)
+					)
 				)
 			),Sud
 		)

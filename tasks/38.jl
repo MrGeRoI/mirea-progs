@@ -1,30 +1,30 @@
-include("../lib/stdrobot.jl")
+include("../lib/unirobot.jl")
+
 #	      Nord	
 #
 #	West    O	  Ost
 #	
 #	       Sud
-
+ 
 #=
 	Робот находится рядом с границей лабиринта произвольной формы.
 	Требуется определить где он находится, внутри лабиринта или снаружи.
 =#
 
-# Стена всегда СЛЕВА от робота!
-# side - текущее направление стены от робота
-function checkinsidemaze!(robot::Robot,maze_side::HorizonSide)
-	result = maze!(robot,maze_side)
-
-	return result[3] > 0
-end
-
 # Тест
-robot = Robot("38A.sit",animate=true)
 
+edgecoord = EdgeRobot{CoordRobot}(CoordRobot{SimpleRobot}(SimpleRobot(Robot("situations/38A.sit",animate=true))),West)
+around!(edgecoord)
 print("A: ")
-println(checkinsidemaze!(robot,West) ? "внутри" : "снаружи")
-
-robot = Robot("38B.sit",animate=true)
-
+println(get_rotates(edgecoord) > 0 ? "внутри" : "снаружи")
+ 
+edgecoord = EdgeRobot{CoordRobot}(CoordRobot{SimpleRobot}(SimpleRobot(Robot("situations/38B.sit",animate=true))),Ost)
+around!(edgecoord)
 print("B: ")
-println(checkinsidemaze!(robot,Ost) ? "внутри" : "снаружи")
+println(get_rotates(edgecoord) > 0 ? "внутри" : "снаружи")
+ 
+edgecoord = EdgeRobot{CoordRobot}(CoordRobot{SimpleRobot}(SimpleRobot(Robot("situations/38C.sit",animate=true))),Sud)
+around!(edgecoord)
+print("C: ")
+println(get_rotates(edgecoord) > 0 ? "внутри" : "снаружи")
+ 
