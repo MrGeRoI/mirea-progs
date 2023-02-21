@@ -1,5 +1,6 @@
 include("coordrobot.jl")
 include("countmarkersrobot.jl")
+#include("turnrobot.jl")
 #include("directrobot.jl")
 include("edgerobot.jl")
 include("spiralrobot.jl")

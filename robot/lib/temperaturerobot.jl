@@ -9,11 +9,14 @@ mutable struct TemperatureRobot{TypeRobot <: AbstractRobot} <: AbstractRobot
 	TemperatureRobot() = TemperatureRobot{SimpleRobot}(SimpleRobot())
 end
 
-get_robot(temperature::TemperatureRobot)::AbstractRobot =
-	temperature.robot
+get_robot(temp::TemperatureRobot)::AbstractRobot =
+	temp.robot
 
-get_temperature(temperature::TemperatureRobot) =
-	temperature.temperature
+get_temperature(temp::TemperatureRobot) =
+	temp.temperature
 
-reset_temperature(temperature::TemperatureRobot) =
-	temperature.temperature = 0
+reset_temperature(temp::TemperatureRobot) =
+	temp.temperature = 0
+
+HorizonSideRobots.move!(temp::TemperatureRobot,side::HorizonSide) =
+	temp.temperature += temperature(temperature)

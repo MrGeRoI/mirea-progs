@@ -39,15 +39,16 @@ along!(robot::Robot,side::HorizonSide)::Nothing =
 #пройти в направлении с указаным количеством шагов
 along!(robot::Robot,side::HorizonSide,num_steps::Integer)::Nothing =
     for _ in 1:num_steps move!(robot,side) end
-	
+
 #пройти в направлении пока функция не вернёт true 
 along!(stop_condition::Function,robot::Robot,side::HorizonSide)::Nothing =
-	while stop_condition(robot) move!(robot,side) end
+	while !stop_condition(robot) move!(robot,side) end
 
 #пройти в направлении пока функция не вернёт true или не кончатся шаги
 function along!(stop_condition::Function,robot::Robot,side::HorizonSide,num_steps::Integer)::Nothing
 	for _ in 1:num_steps
 		if stop_condition(robot) return end
+
 		move!(robot,side)
 	end
 end

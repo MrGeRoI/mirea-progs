@@ -13,12 +13,16 @@ include("../lib/stdrobot.jl")
 
 #найти маркер на бесконечном поле
 function findmarker!(robot::Robot)
-	spiral!(robot,Nord) do robot::Robot
-		return ismarker(robot)	
+	spiral!(robot,Nord) do r::Robot
+		if ismarker(r)
+			return true
+		else
+			putmarker!(r)
+		end
 	end
 end
 
 # Тест
-robot = Robot("8.sit",animate=true)
+robot = Robot("situations/8.sit",animate=true)
 
 findmarker!(robot)
