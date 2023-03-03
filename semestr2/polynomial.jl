@@ -175,16 +175,12 @@ function Base.mod(poly::Polynom{T},m::T)::Polynom{T} where T
 	return result
 end
 
-function Base.mod(a::Polynom{T},b::Polynom{T})::Polynom{T} where T
-	pa,pb = get_power(a),get_power(b)
-	
-	while pb <= pa
-		ca,cb = get_coefficient(a,pa),get_coefficient(b,pb)
+function Base.mod(poly::Polynom{T},m::Tuple)::Polynom{T} where T
+	result = Polynom{T}(poly.Power)
 
-		a = a - ( b * ( ca / cb ) )
-		
-		pa,pb = get_power(a),get_power(b)
+	for i in 0:poly.Power
+		set_coefficient(result,i,mod(get_coefficient(poly,i),m[i + 1]))
 	end
 
-	return a
+	return result
 end

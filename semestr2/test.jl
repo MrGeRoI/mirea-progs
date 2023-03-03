@@ -102,3 +102,9 @@ println("====================")
 println("p(t) (mod 5) = ")
 
 display(Residue{Polynom{Real},5}(poly))
+
+println("====================")
+
+println("p(t) (mod 10,5,4) = ")
+
+display(Residue{Polynom{Real},(10,5,4)}(poly))
