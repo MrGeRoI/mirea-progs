@@ -44,9 +44,7 @@ function Base.display(poly::Polynom{T}) where T
 		print( get_coefficient(poly,i) )
 
 		if i > 1
-			print( " * t^")
-			print( i )
-			print( " + " )
+			print(" * t^",i," + ")
 		elseif i > 0
 			print( " * t + ")
 		end
