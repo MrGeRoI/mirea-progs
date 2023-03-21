@@ -2,7 +2,11 @@
 function FastPower(number::T,degree::Integer)::T where T <: Number
 	power = oneunit(T)
 
+	# инвариант: number ^ degree * power == number ^ degree
+
 	while degree > 0
+		# инвариант: number ^ degree * power == number ^ degree
+
 		if degree % 2 == 0
 			degree = degree / 2
 			number = number * number
@@ -12,17 +16,15 @@ function FastPower(number::T,degree::Integer)::T where T <: Number
 		end
 	end
 
+	# утверждение: degree == 0 и number ^ degree * power == number ^ degree
+	
 	return power
 end
 
 #2. На база этой функции написать другую функцию, возвращающую n-ый член последовательности Фибоначчи (сложность - O(log n))
 
-phi = 0.5 + sqrt(1.25)	# Φ = ( 1 + √5 ) / 2
-phi2 = phi - 1			# φ = ( 1 - √5 ) / 2
-
-# F_n = ( Φ^n - φ^n ) / √5
-function GetFibbonachi(n::Integer)::Real
-	return ( FastPower( phi , n ) - FastPower( phi2 , n ) ) / sqrt(5)
+function GetFibonachi(n::Integer)::Real
+	return 0 #= Нужно юзать какие-то матрицы =#
 end
 
 #3. Написать функцию, вычисляющую с заданной точностью log_a(x)
@@ -37,7 +39,12 @@ function ApproximateLogarithm(number::Real,base::Real,epsilon::Real)::Real
 	result = zero(Real)
 	temp = oneunit(Real)
 
+	# утверждение: base ^ result * number ^ temp == number
+
 	while abs(temp) >= epsilon || number <= (1.0 / base) || number >= base
+
+		# инвариант: base ^ result * number ^ temp == number
+
 		if number >= base
 			number = number / base
 			result = result + temp
@@ -50,69 +57,78 @@ function ApproximateLogarithm(number::Real,base::Real,epsilon::Real)::Real
 		end
 	end
 
+	# утверждение: |temp| < epsilon и
+	#	number > 1.0 / base и number < base
+	#	и
+	#	base ^ result * number ^ temp == number
+		
 	return result
 end
 
 #4. Написать функцию, реализующую приближенное решение уравнения вида f(x) = 0 методом деления отрезка пополам (описание метода см. ниже).
+function SolveBisection(func::Function, left::Real, right::Real, epsilon::Real)::Real
+    @assert func(left) * func(right) < 0 
+    @assert left < right
 
-function SolveBisection(func::Function, a::Real, b::Real, epsilon::Real)::Real
-    @assert func(a) * func(b) < 0 
-    @assert a < b
+	# ИНВАРИАНТ: func(left) * f(right) < 0
+    while (right - left) > epsilon
 
-    f_a = func(a)
+        mid = ( left + right ) / 2.0
 
-    while (b - a) > epsilon
-
-        t = ( a + b ) / 2.0
-
-        f_t = func(t)
-
-        if f_t == 0.0
-            return t
-        elseif f_a * f_t < 0
-            b = t
+        if func(mid) == 0.0
+            return mid
+        elseif func(left) * func(mid) < 0
+            right = mid
         else
-            a, f_a = t, f_t
+            left = mid
         end
 
 	end
 
-    return ( a + b ) / 2.0
+    return ( left + right ) / 2.0
 end
 
 #5. Найти приближенное решение уравнения cos(x) = x методом деления отрезка пополам.
-println("cos(x) = x\nx ~= ",
+println("===\nДеление отрезка пополам:\ncos(x) = x\nx ~= ",
 	SolveBisection(0.0,pi / 2.0,0.01) do x::Real
 		return cos(x) - x
 	end
 )
 
-#6. Написать обобщенную функцию, реализующую метод Ньютона приьлиженного решения уравнения вида f(x)=0 (описание метода см. ниже).
-function NewtonMethod(func::Function, x::Real, epsilon::Real, num_max::Integer = 10)::Real
-	dx = -func(x)
+#6. Написать обобщенную функцию, реализующую метод Ньютона приьлиженного решения уравнения вида f(x) = 0 .
+# ratio: f(x) / f'(x)
+function NewtonMethod(ratio::Function, x::Real, epsilon::Real, num_max::Integer = 10)::Real
+	dx = -ratio(x)
 
-	k = 0
+	for _ in 0:num_max
+		if abs(dx) <= epsilon
+			return x
+		end
 
-	while abs(dx) > epsilon && k <= num_max
 		x += dx
-		k += 1
+		dx = -ratio(x)
 	end
-
-	k > num_max && @warn("Требуемая точность не достигнута")
 
 	return x
 end
 
 #7. Методом Ньютона найти приближеннное решение уравнения cos(x) = x.
-println("cos(x) = x\nx ~= ",
+# f(x) = cos(x) - x
+# f'(x) = - sin(x) - 1
+println("===\nМетод Ньютона:\ncos(x) = x\nx ~= ",
 	NewtonMethod(pi / 4.0,0.01) do x::Real
-		return cos(x) - x
+		return ( cos(x) - x ) /
+			( -sin(x) - 1 )
 	end
 )
 
 #8. Методом Ньютона найти приближеннное значение какого-либо вещественного корня многочлена, заданного своими коэффициенами.
-println("(x-2) * (x^2 + 2*x + 5)\nx ~= ",
+# f(x) = (x - 2) * (x^2 + 2*x + 5)
+# f(x) = x^3 + x - 10
+# f'(x) = 3 * x ^ 2 + 1
+println("===\nМетод Ньютона:\n(x - 2) * (x^2 + 2*x + 5)\nx ~= ",
 	NewtonMethod(4.0,0.01) do x::Real
-		return (x - 2) * (x^2 + 2*x + 5)
+		return ( x^3 + x - 10 ) /
+			( 3*x^2 + 1 )
 	end
 )
