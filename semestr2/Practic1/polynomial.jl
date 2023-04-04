@@ -16,10 +16,10 @@ struct Polynom{T <: Number}
 end
 
 # единица
-Base.oneunit(::Type{Polynom{T}}) where T = Polynom([oneunit(T)])
+Base.oneunit(::Type{Polynom{T}}) where T = Polynom{T}([oneunit(T)])
 
 # ноль
-Base.zero(::Type{Polynom{T}}) where T = Polynom([zero(T)])
+Base.zero(::Type{Polynom{T}}) where T = Polynom{T}([zero(T)])
 
 function get_power(poly::Polynom{T}) where T 
 	for i in poly.Power:-1:0
@@ -181,4 +181,42 @@ function Base.mod(poly::Polynom{T},m::Tuple)::Polynom{T} where T
 	end
 
 	return result
+end
+
+function Base.:^(poly::Polynom{T},power::Integer)::Polynom{T} where T
+	result = oneunit(Polynom{T})
+	
+	for _ in 1:power
+		result *= poly
+	end
+
+	return result
+end
+
+function Base.div(a::Polynom{T},b::Polynom{T})::Polynom{T} where T
+	quotient = zero(Polynom{T})
+
+	n,m = get_power(a),get_power(b)
+
+	while n >= m
+		quotient += Polynom{T}([zero(T),oneunit(T)]) ^ (n - m) * (get_coefficient(a,n) / get_coefficient(b,m))
+		a -= b * Polynom{T}([zero(T),oneunit(T)]) ^ (n - m) * (get_coefficient(a,n) / get_coefficient(b,m))
+		n,m = get_power(a),get_power(b)
+	end
+
+	return quotient
+end
+
+function Base.mod(a::Polynom{T},b::Polynom{T})::Polynom{T} where T
+	quotient = zero(Polynom{T})
+
+	n,m = get_power(a),get_power(b)
+
+	while n >= m
+		quotient += Polynom{T}([zero(T),oneunit(T)]) ^ (n - m) * (get_coefficient(a,n) / get_coefficient(b,m))
+		a -= b * Polynom{T}([zero(T),oneunit(T)]) ^ (n - m) * (get_coefficient(a,n) / get_coefficient(b,m))
+		n,m = get_power(a),get_power(b)
+	end
+
+	return a
 end
