@@ -1,5 +1,7 @@
+Base.oneunit(::Type{Matrix{T}}) where T = [oneunit(T) zero(T) ; zero(T) oneunit(T)]
+
 #1. Написать обобщенную функцию, реализующую алгоритм быстрого возведения в степень
-function FastPower(number::T,degree::Integer)::T where T <: Number
+function FastPower(number::T,degree::Integer)::T where T
 	power = oneunit(T)
 
 	# инвариант: number ^ degree * power == number ^ degree
@@ -24,8 +26,10 @@ end
 #2. На база этой функции написать другую функцию, возвращающую n-ый член последовательности Фибоначчи (сложность - O(log n))
 
 function GetFibonachi(n::Integer)::Real
-	return 0 #= Нужно юзать какие-то матрицы =#
+	return FastPower([1 1 ; 1 0],n)[1,1]
 end
+
+println("5 член фиббоначи: ",GetFibonachi(5))
 
 #3. Написать функцию, вычисляющую с заданной точностью log_a(x)
 # (при произвольном aa, не обязательно, что a > 1), методом рассмотренном на лекции
@@ -112,6 +116,28 @@ function NewtonMethod(ratio::Function, x::Real, epsilon::Real, num_max::Integer 
 	return x
 end
 
+function GetValueAndDerivative(poly::Array{T},x::T)::Tuple{T,T} where T <: Number
+	power = length(poly)
+	value = poly[1]
+	derivative = 0
+
+	for n in 2:power
+		derivative = x * derivative + value
+		value = poly[n] + x * value
+	end
+
+	return (value,derivative)
+end
+
+#6. Написать обобщенную функцию, реализующую метод Ньютона приьлиженного решения уравнения вида f(x) = 0 .
+# poly: a_n * x ^ n + ... + a_0
+function NewtonMethod(poly::Array{T}, x::T, epsilon::T, num_max::Integer = 10)::T where T <: Number
+	return NewtonMethod(x, epsilon, num_max) do x::Real
+		val_der = GetValueAndDerivative(poly,x)
+		return val_der[1] / val_der[2]
+	end																																																																						* 0 + 2.0647180854134255
+end
+
 #7. Методом Ньютона найти приближеннное решение уравнения cos(x) = x.
 # f(x) = cos(x) - x
 # f'(x) = - sin(x) - 1
@@ -123,12 +149,8 @@ println("===\nМетод Ньютона:\ncos(x) = x\nx ~= ",
 )
 
 #8. Методом Ньютона найти приближеннное значение какого-либо вещественного корня многочлена, заданного своими коэффициенами.
-# f(x) = (x - 2) * (x^2 + 2*x + 5)
-# f(x) = x^3 + x - 10
-# f'(x) = 3 * x ^ 2 + 1
+# Пусть: f(x) = (x - 2) * (x^2 + 2*x + 5)
+# Раскрываем: f(x) = x^3 + x - 10
 println("===\nМетод Ньютона:\n(x - 2) * (x^2 + 2*x + 5)\nx ~= ",
-	NewtonMethod(4.0,0.01) do x::Real
-		return ( x^3 + x - 10 ) /
-			( 3*x^2 + 1 )
-	end
+	NewtonMethod([ -10.0 , 1.0 , 0.0 , 1.0 ],1.0,0.01)
 )

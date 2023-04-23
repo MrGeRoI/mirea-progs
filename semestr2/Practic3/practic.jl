@@ -4,7 +4,7 @@ function isprime_(x::Integer)::Bool
 		return false
 	end
 
-	for n in 1:sqrt(x)
+	for n in 2:sqrt(x)
 		if x % n == 0
 			return false
 		end
@@ -12,6 +12,8 @@ function isprime_(x::Integer)::Bool
 
 	return true
 end
+
+println(isprime_(11))
 
 #2. Решето Эратосфена (все числа меньше m)
 function eratosthenes(m::Integer)::Array{Integer}
@@ -77,7 +79,7 @@ function factor(n::Integer)::Tuple{Array{Integer},Array{Integer}}
 	return primes, degrees
 end
 
-print(factor( 2^5 * 3^2 * 131 ))
+println(factor( 2^5 * 3^2 * 131 ))
 
 #4. Вычисление среднего арифметического
 function mean_(nums::Array{Number})::Number
