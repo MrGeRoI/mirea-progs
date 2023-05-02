@@ -56,11 +56,15 @@ function trace(root::Node,inhert::Int = 0)::Nothing
 	print('\t'^inhert)
 	display(root.index)
 	println('\t'^inhert,'[')
-	for node in root.children
-		if isnothing(node)
-			println('\t'^(inhert + 1),"[]")
-		else
-			trace(node,inhert + 1)
+	if length(root.children) == 0
+		println('\t'^(inhert + 1),"(no nodes)")
+	else
+		for node in root.children
+			if isnothing(node)
+				println('\t'^(inhert + 1),"[]")
+			else
+				trace(node,inhert + 1)
+			end
 		end
 	end
 	println('\t'^inhert,']')
@@ -109,8 +113,10 @@ end
 function get_height(root::Node)::Integer
 	height = 0
 
-	for node in root.children do
-		height = max(height,get_height(node))
+	for node in root.children
+		if !isnothing(node)
+			height = max(height,get_height(node))
+		end
 	end
 
 	return height + 1
@@ -124,8 +130,10 @@ function get_leaves(root::Node)::Integer
 
 	leaves = 0 
 
-	for node in root.children do
-		leaves += get_leaves(node)
+	for node in root.children
+		if !isnothing(node)
+			leaves += get_leaves(node)
+		end
 	end
 
 	return leaves
@@ -135,8 +143,10 @@ end
 function get_nodes(root::Node)::Integer
 	nodes = 1 
 
-	for node in root.children do
-		nodes += get_nodes(node)
+	for node in root.children
+		if !isnothing(node)
+			nodes += get_nodes(node)
+		end
 	end
 
 	return nodes
@@ -144,15 +154,25 @@ end
 
 #6.4 функцию, возвращающую наибольшую валентность по выходу вершин дерева
 function get_valence(root::Node)::Integer
-	# что такое валентность?
+	val = length(root.children) 
+
+	for node in root.children
+		if !isnothing(node)
+			val = max(val,get_valence(node))
+		end
+	end
+
+	return val
 end
 
 #6.5 функцию, возвращающую среднюю длину пути к вершинам дерева
 function get_average_path(root::Node)::Integer
 	average = 0
 
-	for node in root.children do
-		average += get_height(node)
+	for node in root.children
+		if !isnothing(node)
+			average += get_height(node)
+		end
 	end
 
 	average /= length(root.children)
@@ -221,3 +241,11 @@ vecTree2 = to_vec(Node(dictTree2,1))
 
 println(dictTree1)
 println(vecTree2)
+
+trace(Node(dictTree2,1))
+
+println("Height: ",get_height(Node(dictTree2,1)))
+println("Leaves: ",get_leaves(Node(dictTree2,1)))
+println("Nodes: ",get_nodes(Node(dictTree2,1)))
+println("Valence: ",get_valence(Node(dictTree2,1)))
+println("Average Path: ",get_average_path(Node(dictTree2,1)))
