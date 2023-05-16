@@ -289,23 +289,23 @@ A = randperm(50000)[1:50000]
 
 #=
 	Пузырёк	O( n^2 )
-	bubble_sort(A)	3.700512 seconds
+	bubble_sort(A)	3.548930 seconds
 
 	Слияния	O( n*log(n) )
-	merge_sort(A)	0.510248 seconds
+	merge_sort(A)	0.402530 seconds
 
 	Вставки	O( n^2 )
-	insert_sort(A)	0.483410 seconds
+	insert_sort(A)	0.824492 seconds
 
 	Шелл	O( n^2 )
-	shell_sort(A)	0.145135 seconds
+	shell_sort(A)	0.088579 seconds
 
 	Быстрая	O( n*log(n) )
-	quick_sort(A)	0.108761 seconds
+	quick_sort(A)	0.088296 seconds
 
 	Эффективная	O(n)
-	calc_sort(A)	0.068190 seconds
+	calc_sort(A)	0.043162 seconds
 
 	Расчёска O( n^2 )
-	comb_sort(A)	0.031001 seconds
+	comb_sort(A)	0.026677 seconds
 =#
