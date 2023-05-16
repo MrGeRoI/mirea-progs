@@ -1,3 +1,4 @@
+using Plots
 using LinearAlgebra
 
 # 1. Спроектировать типы Vector2D и Segment2D с соответсвующими функциями.
@@ -60,8 +61,6 @@ function intersection(s1::Segment2D{T},s2::Segment2D{T})::Union{Vector2D{T},Noth
 	return (;x, y) #Vector2D{T}((x,y))
 end
 
-println("Пересечение: ",intersection( (A=(x=-1.0,y=-1.0),B=(x=1.0,y=2.0)) , (A=(x=1.0,y=-1.0),B=(x=-1.0,y=3.0)) ))
-
 # 5. Написать функцию, проверяющую лежит ли заданная точка внутри заданного многоугольника.
 function isinside(point::Vector2D{T},polygon::AbstractArray{Vector2D{T}})::Bool where T
 	@assert length(polygon) > 2
@@ -77,9 +76,6 @@ function isinside(point::Vector2D{T},polygon::AbstractArray{Vector2D{T}})::Bool 
 	return abs(sum) > π
 end
 
-println("Внутри: ",isinside( (x=0,y=0),[(x=0,y=1),(x=1,y=-1),(x=-1,y=-1)] ))
-println("Внутри: ",isinside( (x=5,y=0),[(x=0,y=1),(x=1,y=-1),(x=-1,y=-1)] ))
-
 # 6. Написать функцию, проверяющую, является ли заданный многоугольник выпуклым.
 function isconvex(polygon::AbstractArray{Vector2D{T}})::Bool where T
 	@assert length(polygon) > 2
@@ -94,12 +90,6 @@ function isconvex(polygon::AbstractArray{Vector2D{T}})::Bool where T
 	
 	return true
 end
-
-println("Выпуклый: ",isconvex( [
-		(x=0,y=1),
-		(x=1,y=-1),
-		(x=-1,y=-1)
-	] ))
 
 # 8. Написать функцию, реализующую алгоритм Грехома построения выпуклой оболочки заданных точек плоскости.
 function grekhom!(points::AbstractArray{Vector2D{T}})::AbstractArray{Vector2D{T}} where T
@@ -131,17 +121,7 @@ function grekhom!(points::AbstractArray{Vector2D{T}})::AbstractArray{Vector2D{T}
 
     return [points[i] for (i) in convex]
 end
-#=
-println("Алгоритм Грехома: ", grekhom!( [
-		(x=0.0,y=0.0),
-		(x=5.0,y=1.0),
-		(x=4.0,y=3.0),
-		(x=1.0,y=9.0),
-		(x=-3.0,y=8.0),
-		(x=-5.0,y=2.0),
-		(x=-2.0,y=3.0),
-	] ) )
-=#
+
 # 9. Написать функцию вычисляющую площадь (ориентированную) заданного многоугольника методом трапеций.
 function area_trapeze(poly::AbstractArray{Vector2D{T}})::T where T
     res = zero(T)
@@ -154,12 +134,6 @@ function area_trapeze(poly::AbstractArray{Vector2D{T}})::T where T
     return res
 end
 
-println("Площадь (Трапеция): ",area_trapeze( [
-		(x=2.0,y=-1.0),
-		(x=1.0,y=2.0),
-		(x=-1.0,y=3.0),
-		(x=-3.0,y=-1.0),
-	] ))
 
 # 10. Написать функцию вычисляющую площадь (ориентированную) заданного многоугольника методом треугольников.
 function area_triangle(poly::AbstractArray{Vector2D{T}})::T where T
@@ -173,9 +147,136 @@ function area_triangle(poly::AbstractArray{Vector2D{T}})::T where T
     return res
 end
 
-println("Площадь (Треугольники): ",area_trapeze( [
-		(x=3.0,y=1.0),
-		(x=1.0,y=2.0),
-		(x=0.0,y=1.0),
-		(x=1.0,y=0.5),
+# 11. Выпуклая оболочка по Джарвису
+function jarvis!(points::AbstractArray{Vector2D{T}})::AbstractArray{Vector2D{T}} where T
+
+	function next!(convex_shell::AbstractArray{T}, points::AbstractArray{Vector2D{T}}, ort_base::Vector2D{T}) where T
+		cos_max = typemin(T)
+		i_base = convex_shell[end]
+		resize!(convex_shell, length(convex_shell) + 1)
+		for i in eachindex(points)
+			if points[i] == points[i_base] # тут не обязательно, что i == i_base
+				continue
+			end
+			ort_i = points[i] - points[i_base] # - не нулевой вектор, задающий направление на очередную точку
+			cos_i = cos(ort_base, ort_i)
+			if cos_i > cos_max
+				cos_max = cos_i
+				convex_shell[end] = i
+			elseif cos_i == cos_max && dot(ort_i,ort_i) > dot(ort_base,ort_base) # на луче, содержащем сторону выпуклого многоугольника, может оказаться более двух точек заданного множества (надо выбрать самую дальнюю из них)
+				convex_shell[end] = i
+			end
+		end
+		return convex_shell[end]
+	end
+
+	@assert length(points) > 1
+	ydata = [points[i].y for i in eachindex(points)]
+	i_start = findmin(ydata)
+	convex_shell = [i_start[1]]
+	ort_base = (x=oneunit(T), y=zero(T))
+	while next!(convex_shell, points, ort_base) != i_start
+		ort_base = convex_shell[end] - convex_shell[end-1]
+	end
+	return points[convex_shell]
+end
+
+#= Отрисовка =#
+
+stored_lims = [0,0,0,0]
+
+function lims!(x1,y1,x2,y2)
+	lims[1] = min(x1-1,lims[1])
+	lims[2] = min(y1-1,lims[2])
+	lims[3] = max(x2+1,lims[3])
+	lims[4] = max(y2+1,lims[4])
+
+	xlims!(lims[1], lims[3])
+	ylims!(lims[2], lims[4])
+end
+
+lims!(x,y) = lims!(x,y,x,y)
+
+function draw(vertices::AbstractArray{Vector2D{T}}) where T
+	vertices = copy(vertices)
+	push!(vertices,first(vertices))
+
+	x = [v[1] for v in vertices]
+	y = [v[2] for v in vertices]
+
+	plot(x, y, color=:blue, legend=false)
+
+	lims!( minimum(x) , minimum(y) , maximum(x) , maximum(y) )
+end
+
+function draw(point::Vector2D{T}) where T
+	scatter!([point.x,point.x], [point.y,point.y], color=:red, markersize=5, legend=false)
+
+	lims!( point.x , point.y )
+end
+
+function clear()
+	fill!(lims,0)
+
+	xlims!(0,1)
+	ylims!(0,1)
+
+	plot!()
+end
+
+#= Отрисовка =#
+
+println("Пересечение: ",intersection( (A=(x=-1.0,y=-1.0),B=(x=1.0,y=2.0)) , (A=(x=1.0,y=-1.0),B=(x=-1.0,y=3.0)) ))
+
+println("Внутри: ",isinside( (x=0,y=0),[(x=0,y=1),(x=1,y=-1),(x=-1,y=-1)] ))
+println("Внутри: ",isinside( (x=5,y=0),[(x=0,y=1),(x=1,y=-1),(x=-1,y=-1)] ))
+
+println("Выпуклый: ",isconvex( [
+		(x=0,y=1),
+		(x=1,y=-1),
+		(x=-1,y=-1)
 	] ))
+	
+println("Площадь (Трапеция): ",area_trapeze( [
+	(x=2.0,y=-1.0),
+	(x=1.0,y=2.0),
+	(x=-1.0,y=3.0),
+	(x=-3.0,y=-1.0),
+] ))
+
+#=
+println("Алгоритм Грехома: ", grekhom!( [
+		(x=0.0,y=0.0),
+		(x=5.0,y=1.0),
+		(x=4.0,y=3.0),
+		(x=1.0,y=9.0),
+		(x=-3.0,y=8.0),
+		(x=-5.0,y=2.0),
+		(x=-2.0,y=3.0),
+	] ) )
+=#
+
+println("Алгоритм Джарвиса: ", jarvis!( [
+		(x=0.0,y=0.0),
+		(x=5.0,y=1.0),
+		(x=4.0,y=3.0),
+		(x=1.0,y=9.0),
+		(x=-3.0,y=8.0),
+		(x=-5.0,y=2.0),
+		(x=-2.0,y=3.0),
+	] ) )
+
+println("Площадь (Треугольники): ",area_trapeze( [
+	(x=3.0,y=1.0),
+	(x=1.0,y=2.0),
+	(x=0.0,y=1.0),
+	(x=1.0,y=0.5),
+] ))
+
+draw([(x=0,y=1),
+(x=1,y=-1),
+(x=-1,y=-1)])
+
+clear()
+
+draw((x=0,y=1))
