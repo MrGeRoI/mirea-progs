@@ -26,6 +26,50 @@ Base.sign(a::Vector2D{T}, b::Vector2D{T}) where T = sign(sin(a,b))
 
 Segment2D{T <: Real} = NamedTuple{(:A, :B), NTuple{2,Vector2D{T}}}
 
+#= Отрисовка =#
+stored_lims = [0,0,0,0]
+
+function lims!(x1,y1,x2,y2)
+	stored_lims[1] = min(x1-1,stored_lims[1])
+	stored_lims[2] = min(y1-1,stored_lims[2])
+	stored_lims[3] = max(x2+1,stored_lims[3])
+	stored_lims[4] = max(y2+1,stored_lims[4])
+
+	xlims!(stored_lims[1], stored_lims[3])
+	ylims!(stored_lims[2], stored_lims[4])
+end
+
+lims!(x,y) = lims!(x,y,x,y)
+
+function draw(vertices::AbstractArray{Vector2D{T}}) where T
+	vertices = copy(vertices)
+	push!(vertices,first(vertices))
+
+	x = [v.x for v in vertices]
+	y = [v.y for v in vertices]
+
+	plot(x, y, color=:blue, legend=false)
+
+	lims!( minimum(x) , minimum(y) , maximum(x) , maximum(y) )
+end
+
+function draw(point::Vector2D{T}) where T
+	scatter!([point.x,point.x], [point.y,point.y], color=:red, markersize=5, legend=false)
+
+	lims!( point.x , point.y )
+end
+
+function clear()
+	fill!(stored_lims,0)
+
+	xlims!(0,1)
+	ylims!(0,1)
+
+	plot!()
+end
+
+#= Отрисовка =#
+
 # 2. Написать функцию, проверяющую, лежат ли две заданные точки по одну сторону от заданной прямой (прямая задается некоторым содержащимся в ней отрезком).
 function oneside(P::Vector2D{T}, Q::Vector2D{T}, s::Segment2D{T})::Bool where T
 	# l - направляющий вектор прямой
@@ -103,35 +147,105 @@ println("Выпуклый: ",isconvex( [
 	] ))
 	
 
+# 7. Выпуклая оболочка по Джарвису
+function jarvis!(points::AbstractArray{Vector2D{T}})::AbstractArray{Vector2D{T}} where T
+	#=
+	function oreintation(p::Vector2D{T},q::Vector2D{T},r::Vector2D{T})::Bool where T
+		return ( (q.y * p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y) ) > 2
+	end
+
+	#На нулевом шаге мы выбрали точку, точно лежащую в выпуклой оболочке
+	@assert length(points) > 1
+
+	if length(points) < 3
+		return points
+	end
+
+	ydata = [points[i].y for i in eachindex(points)]
+	i_start = findmin(ydata)
+	i_cur = i_start[2]
+	p = points[i_start[2]]
+	q = nothing
+	convex_shell = []
+
+	while true
+		push!(convex_shell,i_cur)
+		q = (x=p.x + oneunit(T),y= p.y + zero(T))
+		
+		for i in firstindex(points):lastindex(points)
+			if oreintation(p,points[i],q)
+				q = points[i]
+				i_cur = i
+			end
+		end
+
+		p = q
+		println(i_cur," ", i_start[2])
+		if i_cur == i_start[2]
+			break
+		end
+	end
+
+	return points[convex_shell]=#
+	p0 = points[0]
+    sort!(@view(points[begin+1:end]), by=(point -> angle(point, (x=oneunit(T),y=zero(T)))))
+    convex = [p0]
+    while true
+        t = p0 # кандидат на следующую точку
+        for p in firstindex(points):lastindex(points)
+            # лучше никакие полярные углы не считать
+            if (dot((p - p0) , (t - p0)) > 0)
+                t = p
+
+        if t == p0
+            continue
+		end
+		
+        else {
+            p0 = t;
+            hull.push_back(t);
+        }
+	end
+
+    return points[convex];
+end
+
+println("Алгоритм Джарвиса: ", jarvis!( [
+		(x=0.0,y=0.0),
+		(x=5.0,y=1.0),
+		(x=4.0,y=3.0),
+		(x=1.0,y=9.0),
+		(x=-3.0,y=8.0),
+		(x=-5.0,y=2.0),
+		(x=-2.0,y=3.0),
+	] ) )
+
 # 8. Написать функцию, реализующую алгоритм Грехома построения выпуклой оболочки заданных точек плоскости.
 function grekhom!(points::AbstractArray{Vector2D{T}})::AbstractArray{Vector2D{T}} where T
-    ydata = (points[i][2] for i in 1:length(points))
+	ydata = [points[i].y for i in 1:length(points)]
 
 	# Сначала надо найти базовую точку , и выбираеть базовое направление (точно так же, как это делалось в алгоритме Джарвиса).
-    i_start = findmin(ydata)
-
+	i_start = findmin(ydata)
 	# Далее в выпуклую оболочку помещаютсяточки (они гарантированно в неё входят).
-    points[begin], points[i_start[2]] = points[i_start[2]], points[begin]
+	points[begin], points[i_start[2]] = points[i_start[2]], points[begin]
 
 	# Все остальные точки сортируются по возрастанию угла между вектором и вектором для k = 1,2,3,...,N.
-    sort!(@view(points[begin+1:end]), by=(point -> angle(point, (x=oneunit(T),y=zero(T)))))
-    push!(points, points[begin])
+	sort!(@view(points[begin+1:end]), by=(point -> angle(point, (x=oneunit(T),y=zero(T)))))
+	push!(points, points[begin])
 
-    convex = [firstindex(points), firstindex(points) + 1, firstindex(points) + 2]
+	convex = [firstindex(points), firstindex(points) + 1, firstindex(points) + 2]
 
 	# Каждая сдедующая в отсортирванном порядке точка помещается в выпуклую оболочку, но пока временно. Т.е. эта точка помещается на вершину стека, в
 	# который вконце-концов должна быть помещена вся выпуклая оболочка, но на следующих шагах алгоритма некоторые точки с вершины этого стека могут] быть сняты.
-    for i in firstindex(points)+3:lastindex(points)
-        while sign(points[i] - points[convex[end]], points[convex[end-1]] - points[convex[end]]) < 0
-            pop!(convex)
-        end
+	for i in firstindex(points)+3:lastindex(points)
+		while length(convex) > 1 && sign(points[i] - points[convex[end]], points[convex[end-1]] - points[convex[end]]) < 0
+			pop!(convex)
+		end
 
-        push!(convex, i)
-    end
+		push!(convex, i)
+	end
 
-    pop!(points)
-
-    return [points[i] for (i) in convex]
+	return points[convex]
 end
 
 println("Алгоритм Грехома: ", grekhom!( [
@@ -183,103 +297,6 @@ println("Площадь (Треугольники): ",area_triangle( [
 	(x=1.0,y=0.5),
 ] ))
 
-# 11. Выпуклая оболочка по Джарвису
-function jarvis!(points::AbstractArray{Vector2D{T}})::AbstractArray{Vector2D{T}} where T
-
-	function next!(convex_shell::AbstractArray{T}, points::AbstractArray{Vector2D{T}}, ort_base::Vector2D{T}) where T
-		cos_max = typemin(T)
-		i_base = convex_shell[end]
-		resize!(convex_shell, length(convex_shell) + 1)
-		#На  i-м шаге мы взяли такую точку, что все остальные лежат по левую сторону отрезка (pi-1,pi), и поэтому точно не перекрывают точку pi
-
-		for i in eachindex(points)
-			if points[i] == points[i_base] # тут не обязательно, что i == i_base
-				continue
-			end
-			ort_i = points[i] - points[i_base] # - не нулевой вектор, задающий направление на очередную точку
-			cos_i = cos(ort_base, ort_i)
-			if cos_i > cos_max
-				cos_max = cos_i
-				convex_shell[end] = i
-			elseif cos_i == cos_max && dot(ort_i,ort_i) > dot(ort_base,ort_base) # на луче, содержащем сторону выпуклого многоугольника, может оказаться более двух точек заданного множества (надо выбрать самую дальнюю из них)
-				convex_shell[end] = i
-			end
-		end
-
-		return convex_shell[end]
-	end
-
-	#На нулевом шаге мы выбрали точку, точно лежащую в выпуклой оболочке
-	@assert length(points) > 1
-	ydata = [points[i].y for i in eachindex(points)]
-	i_start = findmin(ydata)
-	convex_shell = [i_start[1]]
-	ort_base = (x=oneunit(T), y=zero(T))
-
-	while next!(convex_shell, points, ort_base) != i_start
-		ort_base = convex_shell[end] - convex_shell[end-1]
-	end
-
-	return points[convex_shell]
-end
-
-#=
-println("Алгоритм Джарвиса: ", jarvis!( [
-		(x=0.0,y=0.0),
-		(x=5.0,y=1.0),
-		(x=4.0,y=3.0),
-		(x=1.0,y=9.0),
-		(x=-3.0,y=8.0),
-		(x=-5.0,y=2.0),
-		(x=-2.0,y=3.0),
-	] ) )
-=#
-
-#= Отрисовка =#
-
-stored_lims = [0,0,0,0]
-
-function lims!(x1,y1,x2,y2)
-	stored_lims[1] = min(x1-1,stored_lims[1])
-	stored_lims[2] = min(y1-1,stored_lims[2])
-	stored_lims[3] = max(x2+1,stored_lims[3])
-	stored_lims[4] = max(y2+1,stored_lims[4])
-
-	xlims!(stored_lims[1], stored_lims[3])
-	ylims!(stored_lims[2], stored_lims[4])
-end
-
-lims!(x,y) = lims!(x,y,x,y)
-
-function draw(vertices::AbstractArray{Vector2D{T}}) where T
-	vertices = copy(vertices)
-	push!(vertices,first(vertices))
-
-	x = [v.x for v in vertices]
-	y = [v.y for v in vertices]
-
-	plot(x, y, color=:blue, legend=false)
-
-	lims!( minimum(x) , minimum(y) , maximum(x) , maximum(y) )
-end
-
-function draw(point::Vector2D{T}) where T
-	scatter!([point.x,point.x], [point.y,point.y], color=:red, markersize=5, legend=false)
-
-	lims!( point.x , point.y )
-end
-
-function clear()
-	fill!(stored_lims,0)
-
-	xlims!(0,1)
-	ylims!(0,1)
-
-	plot!()
-end
-
-#= Отрисовка =#
-
 draw([(x=0,y=2),
 (x=1,y=-1),
 (x=-1,y=-1)])
@@ -304,3 +321,25 @@ draw((x=-1,y=0))
 draw((x=1,y=0))
 
 savefig("rect.png") 
+
+clear()
+
+draw( [
+	(x=0,y=0),
+	(x=5,y=1),
+	(x=4,y=3),
+	(x=1,y=9),
+	(x=-3,y=8),
+] )
+
+draw((x=0,y=0))
+draw((x=5,y=1))
+draw((x=4,y=3))
+draw((x=1,y=9))
+draw((x=-3,y=8))
+draw((x=-5,y=2))
+draw((x=-2,y=3))
+
+savefig("grekhom.png")
+
+fig = Vector2D{Int}[]
