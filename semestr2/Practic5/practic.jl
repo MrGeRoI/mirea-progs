@@ -275,7 +275,7 @@ heap(array::AbstractVector)::AbstractVector = heap!(copy(array))
 # Использую модуль Random для генерации случайного массива
 using Random
 
-A = randperm(50000)[1:50000]
+A = randperm(100000)[1:100000]
 
 @showtime bubble_sort(A)
 @showtime insert_sort(A)
@@ -283,29 +283,22 @@ A = randperm(50000)[1:50000]
 @showtime shell_sort(A)
 @showtime merge_sort(A)
 @showtime quick_sort(A)
-@showtime calc_sort(A)
 
-# Топ сортировок
+#= Топ сортировок 
+bubble_sort(A): 26.440701 seconds
+insert_sort(A): 4.235230 seconds
+comb_sort(A): 0.132195 seconds
+shell_sort(A): 0.375892 seconds
+merge_sort(A): 1.152994 seconds
+quick_sort(A): 0.255517 seconds
+=#
 
-#=
-	Пузырёк	O( n^2 )
-	bubble_sort(A)	3.548930 seconds
+@showtime sort(A,alg=InsertionSort)
+@showtime sort(A,alg=QuickSort)
+@showtime sort(A,alg=MergeSort)
 
-	Слияния	O( n*log(n) )
-	merge_sort(A)	0.402530 seconds
-
-	Вставки	O( n^2 )
-	insert_sort(A)	0.824492 seconds
-
-	Шелл	O( n^2 )
-	shell_sort(A)	0.088579 seconds
-
-	Быстрая	O( n*log(n) )
-	quick_sort(A)	0.088296 seconds
-
-	Эффективная	O(n)
-	calc_sort(A)	0.043162 seconds
-
-	Расчёска O( n^2 )
-	comb_sort(A)	0.026677 seconds
+#= Библиотечные сортировки
+sort(A, alg = InsertionSort): 1.881611 seconds
+sort(A, alg = QuickSort): 0.190779 seconds
+sort(A, alg = MergeSort): 0.246879 seconds
 =#
