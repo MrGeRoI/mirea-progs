@@ -171,19 +171,19 @@ function area_triangle(poly::AbstractArray{Vector2D{T}})::T where T
 
 	# area = (yk + yk+1)(xk+1 − xk)/2
     for i in firstindex(poly)+1:lastindex(poly)-1
-        res += xdot(poly[i] - (poly[0]), poly[i+1] - poly[0])
+        res += xdot(poly[i] - (poly[1]), poly[i+1] - poly[1])
     end
 
     return res
 end
-#=
+
 println("Площадь (Треугольники): ",area_triangle( [
 	(x=3.0,y=1.0),
 	(x=1.0,y=2.0),
 	(x=0.0,y=1.0),
 	(x=1.0,y=0.5),
 ] ))
-=#
+
 # 11. Выпуклая оболочка по Джарвису
 function jarvis!(points::AbstractArray{Vector2D{T}})::AbstractArray{Vector2D{T}} where T
 
@@ -235,6 +235,7 @@ println("Алгоритм Джарвиса: ", jarvis!( [
 		(x=-2.0,y=3.0),
 	] ) )
 =#
+
 #= Отрисовка =#
 
 stored_lims = [0,0,0,0]
