@@ -134,7 +134,6 @@ function grekhom!(points::AbstractArray{Vector2D{T}})::AbstractArray{Vector2D{T}
     return [points[i] for (i) in convex]
 end
 
-#=
 println("Алгоритм Грехома: ", grekhom!( [
 		(x=0.0,y=0.0),
 		(x=5.0,y=1.0),
@@ -144,7 +143,7 @@ println("Алгоритм Грехома: ", grekhom!( [
 		(x=-5.0,y=2.0),
 		(x=-2.0,y=3.0),
 	] ) )
-=#
+
 # 9. Написать функцию вычисляющую площадь (ориентированную) заданного многоугольника методом трапеций.
 function area_trapeze(poly::AbstractArray{Vector2D{T}})::T where T
     res = zero(T)
@@ -256,8 +255,8 @@ function draw(vertices::AbstractArray{Vector2D{T}}) where T
 	vertices = copy(vertices)
 	push!(vertices,first(vertices))
 
-	x = [v[1] for v in vertices]
-	y = [v[2] for v in vertices]
+	x = [v.x for v in vertices]
+	y = [v.y for v in vertices]
 
 	plot(x, y, color=:blue, legend=false)
 
