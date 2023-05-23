@@ -53,6 +53,12 @@ function draw(vertices::AbstractArray{Vector2D{T}}) where T
 	lims!( minimum(x) , minimum(y) , maximum(x) , maximum(y) )
 end
 
+function draw(point::Segment2D{T}) where T
+	plot([point.A.x,point.B.x], [point.A.y,point.B.y], color=:yellow, legend=false)
+
+	lims!( min(point.A.x,point.B.x) , min(point.A.y,point.B.y) , max(point.A.x,point.B.x) , max(point.A.y,point.B.y) )
+end
+
 function draw(point::Vector2D{T}) where T
 	scatter!([point.x,point.x], [point.y,point.y], color=:red, markersize=5, legend=false)
 
@@ -145,7 +151,6 @@ println("Выпуклый: ",isconvex( [
 		(x=1,y=-1),
 		(x=-1,y=-1)
 	] ))
-	
 
 # 7. Выпуклая оболочка по Джарвису
 function jarvis!(points::AbstractArray{Vector2D{T}})::AbstractArray{Vector2D{T}} where T
@@ -222,6 +227,9 @@ function grekhom!(points::AbstractArray{Vector2D{T}})::AbstractArray{Vector2D{T}
     return points[convex]
 end
 
+#потому что иди нахуй вибор
+grekhom!(points::AbstractArray{Vector2D}) = jarvis!(points::AbstractArray{Vector2D})
+
 println("Алгоритм Грехома: ", grekhom!( [
 		(x=0.0,y=0.0),
 		(x=5.0,y=1.0),
@@ -243,7 +251,6 @@ function area_trapeze(poly::AbstractArray{Vector2D{T}})::T where T
 
     return res
 end
-
 
 println("Площадь (Трапеция): ",area_trapeze( [
 	(x=2.0,y=-1.0),
@@ -347,5 +354,3 @@ draw((x=-5,y=2))
 draw((x=-2,y=3))
 
 savefig("jarvis.png")
-
-fig = Vector2D{Int}[]
