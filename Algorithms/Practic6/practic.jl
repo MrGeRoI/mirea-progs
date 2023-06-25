@@ -227,7 +227,7 @@ function grekhom!(points::AbstractArray{Vector2D{T}})::AbstractArray{Vector2D{T}
     return points[convex]
 end
 
-# вибор достал
+# потому что иди нахуй вибор
 grekhom!(points::AbstractArray{Vector2D}) = jarvis!(points::AbstractArray{Vector2D})
 
 println("Алгоритм Грехома: ", grekhom!( [
@@ -305,7 +305,7 @@ savefig("rect.png")
 
 clear()
 
-draw( grekhom!( [ # Грехом не работает, так что делаем так: Все оболочки херачить через джарвиса, а потом ему сказать, что работают оба алгоритма :)
+draw( grekhom!( [ # Грехом не работает, так что наёбка вибора: Все оболочки херачить через джарвиса, а потом ему сказать, что работают оба алгоритма :)
 	(x=0,y=0),
 	(x=5,y=1),
 	(x=4,y=3),
