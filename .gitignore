@@ -55,6 +55,7 @@ Manifest.toml
 *.exe
 *.out
 *.app
+*.bat
 
 # Dirs
 .vscode/
