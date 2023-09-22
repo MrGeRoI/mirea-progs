@@ -14,11 +14,14 @@ using namespace std;
 template<class K, class V>
 V find(const map<K,V>& tree,K key)
 {
+	return tree.find(key)->second;
+	/*
 	for(typename map<K,V>::const_iterator it = tree.begin();it != tree.end();it++)
 		if(it->first == key)
 			return it->second;
 
 	return 0;
+	*/
 }
 
 // Постройте функцию вывода содержимого дерева с помощью итераторов
@@ -98,4 +101,6 @@ int main()
 
 	cout << "\nStudents:\n";
 	print(students);
+
+	cout << "Find Yarik: " << find(students,string("Yarik")) << endl;
 }

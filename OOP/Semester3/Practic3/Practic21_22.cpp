@@ -15,21 +15,13 @@ using namespace std;
 template<class K, class V>
 V find(const map<K,V>& tree,K key)
 {
-	for(typename map<K,V>::const_iterator it = tree.begin();it != tree.end();it++)
-		if(it->first == key)
-			return it->second;
-
-	return 0;
+	return tree.find(key)->second;
 }
 
 template<class K, class V>
 V find(const multimap<K,V>& tree,K key)
 {
-	for(typename multimap<K,V>::const_iterator it = tree.begin();it != tree.end();it++)
-		if(it->first == key)
-			return it->second;
-
-	return 0;
+	return tree.find(key)->second;
 }
 
 // Постройте функцию вывода содержимого дерева с помощью итераторов
