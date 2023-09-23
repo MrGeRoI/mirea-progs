@@ -1,18 +1,34 @@
-#include <map>
+#include <list>
 #include <iostream>
 
 using namespace std;
 
+class B
+{
+public:
+	int num;
+};
+
+class A
+{
+private:
+	int num;
+	B *b;
+public:
+	A() : num(228) { b = new B(); b->num = 10; }
+
+	int& operator * () { return b->num;}
+	const int& operator * () const { return b->num;}
+
+	~A() { delete b; }
+};
+
 int main()
 {
-	map<int, int> nums;
+	A a;
+	*a = 123;
+	cout << *a << endl;
 
-	nums[4] = 4;
-	nums[3] = 3;
-	nums[5] = 5;
-	nums[6] = 6;
 
-	for(typename map<int,int>::iterator it = nums.begin();it != nums.end();it++)
-		cout << it->second << " ";
-
+	return 0;
 }
