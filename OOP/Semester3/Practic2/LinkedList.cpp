@@ -182,9 +182,19 @@ public:
 	}
 	//перемещение с помощью итераторов
 	ListIterator& operator++() { _element = _element->GetNext();  return *this; } //Префиксный ++
-	ListIterator& operator++(int _) { _element = _element->GetNext(); return *this; } //Постфиксный ++
+	ListIterator operator++(int)
+	{
+		ListIterator it(*this);
+		_element = _element->GetNext()
+		return it;
+	} //Постфиксный ++
 	ListIterator& operator--() { _element = _element->GetPrevious();  return *this; } //Префиксный --
-	ListIterator& operator--(int _) { _element = _element->GetPrevious(); return *this; } //Постфиксный --
+	ListIterator operator--(int)
+	{
+		ListIterator it(*this);
+		_element = _element->GetPrevious()
+		return it;
+	} //Постфиксный --
 
 private:
 	//текущий элемент

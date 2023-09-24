@@ -1,4 +1,4 @@
-#pragma warning(disable : 4996) //Вырубает предупреждение про итераторы
+#pragma warning(disable : 4996) // Вырубает предупреждение про итераторы
 
 #include <iostream>
 #include <fstream>
@@ -14,7 +14,7 @@ class Student
 public:
 	string _firstname, _lastname, _address;
 	bool _male;
-	int _birthday,_grade;
+	int _birthday, _grade;
 
 	Student()
 	{
@@ -23,7 +23,7 @@ public:
 		_grade = 0;
 	}
 
-	Student(const char* firstname,const char* lastname,const char* address,bool male, int birthday,int grade)
+	Student(const char *firstname, const char *lastname, const char *address, bool male, int birthday, int grade)
 	{
 		_firstname = firstname;
 		_lastname = lastname;
@@ -33,7 +33,7 @@ public:
 		_grade = grade;
 	}
 
-	Student(const Student& stud)
+	Student(const Student &stud)
 	{
 		_firstname = stud._firstname;
 		_lastname = stud._lastname;
@@ -43,53 +43,53 @@ public:
 		_grade = stud._grade;
 	}
 
-	~Student() { }
+	~Student() {}
 
-	friend ostream& operator << (ostream& s,const Student& value);
-	friend istream& operator >> (istream& s, Student& value);
+	friend ostream &operator<<(ostream &s, const Student &value);
+	friend istream &operator>>(istream &s, Student &value);
 
-	bool operator < (const Student& stud) const
+	bool operator<(const Student &stud) const
 	{
-		if(_birthday < stud._birthday)
+		if (_birthday < stud._birthday)
 			return true;
 
-		if(_lastname < stud._lastname)
+		if (_lastname < stud._lastname)
 			return true;
 
-		if(_firstname < stud._firstname)
+		if (_firstname < stud._firstname)
 			return true;
 
 		return false;
 	}
 
-	bool operator > (const Student& stud) const
+	bool operator>(const Student &stud) const
 	{
-		if(_birthday > stud._birthday)
+		if (_birthday > stud._birthday)
 			return true;
 
-		if(_lastname > stud._lastname)
+		if (_lastname > stud._lastname)
 			return true;
 
-		if(_firstname > stud._firstname)
+		if (_firstname > stud._firstname)
 			return true;
 
 		return false;
 	}
 
-	bool operator == (const Student& stud) const
+	bool operator==(const Student &stud) const
 	{
 		return _firstname == stud._firstname &&
-			_lastname == stud._lastname &&
-			_birthday == stud._birthday;
+			   _lastname == stud._lastname &&
+			   _birthday == stud._birthday;
 	}
 };
 
-ostream& operator << (ostream& stream,const Student& value)
+ostream &operator<<(ostream &stream, const Student &value)
 {
 	return stream << value._firstname << ' ' << value._lastname << ' ' << value._address << ' ' << value._male << ' ' << value._birthday << ' ' << value._grade;
 }
 
-istream& operator >> (istream& stream, Student& value)
+istream &operator>>(istream &stream, Student &value)
 {
 	return stream >> value._firstname >> value._lastname >> value._address >> value._male >> value._birthday >> value._grade;
 }
@@ -97,34 +97,40 @@ istream& operator >> (istream& stream, Student& value)
 template <class T>
 class Element
 {
-	//элемент связного списка
+	// элемент связного списка
 private:
-	//указатель на предыдущий и следующий элемент
-	Element* _next;
-	Element* _previous;
+	// указатель на предыдущий и следующий элемент
+	Element *_next;
+	Element *_previous;
 
-	//информация, хранимая в поле
+	// информация, хранимая в поле
 	T _value;
+
 public:
-	//доступ к полю *_next
-	virtual Element* GetNext() const { return _next; }
-	virtual void SetNext(Element* value) { _next = value; }
+	// доступ к полю *_next
+	virtual Element *GetNext() const { return _next; }
+	virtual void SetNext(Element *value) { _next = value; }
 
-	//доступ к полю *_previous
-	virtual Element* GetPrevious() const { return _previous; }
-	virtual void SetPrevious(Element* value) { _previous = value; }
+	// доступ к полю *_previous
+	virtual Element *GetPrevious() const { return _previous; }
+	virtual void SetPrevious(Element *value) { _previous = value; }
 
-	//доступ к полю с хранимой информацией _value
+	// доступ к полю с хранимой информацией _value
 	virtual T GetValue() const { return _value; }
 	virtual void SetValue(T value) { _value = value; }
 
-	template<class T1> friend ostream& operator << (ostream& stream,const Element<T1>& obj);
+	template <class T1>
+	friend ostream &operator<<(ostream &stream, const Element<T1> &obj);
 
-	Element(T value) { _value = value; _next = _previous = nullptr; }
+	Element(T value)
+	{
+		_value = value;
+		_next = _previous = nullptr;
+	}
 };
 
-template<class T>
-ostream& operator << (ostream& stream,const Element<T>& obj)
+template <class T>
+ostream &operator<<(ostream &stream, const Element<T> &obj)
 {
 	return stream << obj._value;
 }
@@ -133,37 +139,37 @@ template <class T>
 class LinkedList
 {
 protected:
-	//достаточно хранить начало и конец
-	Element<T>* _head;
-	Element<T>* _tail;
-	//для удобства храним количество элементов
+	// достаточно хранить начало и конец
+	Element<T> *_head;
+	Element<T> *_tail;
+	// для удобства храним количество элементов
 	int _count;
 
 public:
 	virtual int Count() const { return _count; }
 
-	virtual Element<T>* GetBegin() const { return _head; }
+	virtual Element<T> *GetBegin() const { return _head; }
 
-	virtual Element<T>* GetEnd() const { return _tail; }
+	virtual Element<T> *GetEnd() const { return _tail; }
 
-	//конструктор без параметров
+	// конструктор без параметров
 	LinkedList()
 	{
 		_head = _tail = nullptr;
 		_count = 0;
 	}
 
-	//чисто виртуальная функция: пока не определимся с типом списка, не сможем реализовать добавление
-	virtual Element<T>* Push(T value) = 0;
+	// чисто виртуальная функция: пока не определимся с типом списка, не сможем реализовать добавление
+	virtual Element<T> *Push(T value) = 0;
 
-	//чисто виртуальная функция: пока не определимся с типом списка, не сможем реализовать удаление
+	// чисто виртуальная функция: пока не определимся с типом списка, не сможем реализовать удаление
 	virtual T Pop() = 0;
 
 	virtual ~LinkedList()
 	{
-		//деструктор - освобождение памяти
-		Element<T>* previous;
-		for (Element<T>* current = _head; current != nullptr;)
+		// деструктор - освобождение памяти
+		Element<T> *previous;
+		for (Element<T> *current = _head; current != nullptr;)
 		{
 			previous = current;
 			current = current->GetNext();
@@ -171,56 +177,60 @@ public:
 		}
 	}
 
-	//получение элемента по индексу - какова асимптотическая оценка этого действия?
-	// O(n)
-	virtual Element<T>* operator[](int i) const
+	// получение элемента по индексу - какова асимптотическая оценка этого действия?
+	//  O(n)
+	virtual Element<T> *operator[](int i) const
 	{
-		//индексация
-		if (i < 0 || i > _count) return nullptr;
+		// индексация
+		if (i < 0 || i > _count)
+			return nullptr;
 
-		//ищем i-й элемент - вставем в начало и отсчитываем i шагов вперед
-		Element<T>* cur = _head;
+		// ищем i-й элемент - вставем в начало и отсчитываем i шагов вперед
+		Element<T> *cur = _head;
 		for (int k = 0; k < i; k++)
 			cur = cur->GetNext();
 
 		return cur;
 	}
 
-	template<class T1> friend ofstream& operator << (ofstream& stream,const LinkedList<T1>& obj);
-	template<class T1> friend ostream& operator << (ostream& stream,const LinkedList<T1>& obj);
-	template<class T1> friend istream& operator >> (istream& stream, LinkedList<T1>& obj);
+	template <class T1>
+	friend ofstream &operator<<(ofstream &stream, const LinkedList<T1> &obj);
+	template <class T1>
+	friend ostream &operator<<(ostream &stream, const LinkedList<T1> &obj);
+	template <class T1>
+	friend istream &operator>>(istream &stream, LinkedList<T1> &obj);
 };
 
 /*Петрусевич, какого хуя тут такие костыли, ты долбаёб?
 Надо просто сделать перегрузки функций ввода/ввывода из файла и консоли
 для типов ostream и ofstream*/
-template<class T>
-ofstream& operator << (ofstream& stream,const LinkedList<T>& obj)
+template <class T>
+ofstream &operator<<(ofstream &stream, const LinkedList<T> &obj)
 {
 	stream << obj._count << "\n";
-	for (Element<T>* current = obj.GetBegin(); current != nullptr; current = current->GetNext())
+	for (Element<T> *current = obj.GetBegin(); current != nullptr; current = current->GetNext())
 		stream << current->GetValue() << " ";
 	return stream;
 }
 
-template<class T>
-ostream& operator << (ostream& stream,const LinkedList<T>& obj)
+template <class T>
+ostream &operator<<(ostream &stream, const LinkedList<T> &obj)
 {
-	for (Element<T>* current = obj.GetBegin(); current != nullptr; current = current->GetNext())
+	for (Element<T> *current = obj.GetBegin(); current != nullptr; current = current->GetNext())
 		stream << current->GetValue() << "\n";
 
 	return stream;
 }
 
-template<class T>
-istream& operator >> (istream& stream, LinkedList<T>& list)
+template <class T>
+istream &operator>>(istream &stream, LinkedList<T> &list)
 {
-	//чтение из файла и консоли совпадают
+	// чтение из файла и консоли совпадают
 	stream >> list._count;
-	//здесь надо очистить память под obj, установить obj.num = 0
+	// здесь надо очистить память под obj, установить obj.num = 0
 
-	Element<T>* previous;
-	for (Element<T>* current = list._head; current != nullptr;)
+	Element<T> *previous;
+	for (Element<T> *current = list._head; current != nullptr;)
 	{
 		previous = current;
 		current = current->GetNext();
@@ -233,79 +243,111 @@ istream& operator >> (istream& stream, LinkedList<T>& list)
 		stream >> value;
 		list.Push(value);
 	}
-	
+
 	return stream;
 }
 
-//дописать класс итератора по списку
-template<typename T>
+// дописать класс итератора по списку
+template <typename T>
 class ListIterator : public iterator<input_iterator_tag, T>
 {
 public:
-	//конструкторы
+	// конструкторы
 	ListIterator() { _element = nullptr; }
-	ListIterator(Element<T>* p) { _element = p; }
-	ListIterator(const ListIterator& it) { _element = it._element; }
+	ListIterator(Element<T> *p) { _element = p; }
+	ListIterator(const ListIterator &it) { _element = it._element; }
 
-	//методы работы с итераторами
-	//присваивание
-	ListIterator& operator=(const ListIterator& it) { _element = it._element; return *this; }
-	ListIterator& operator=(Element<T>* p) { _element = p; return *this; }
-
-	//проверка итераторов на равенство
-	bool operator!=(ListIterator const& other) const { return _element != other._element; }
-	bool operator==(ListIterator const& other) const { return _element == other._element; }
-
-	Element<T>* GetElement() const { return _element; }
-	void SetElement(Element<T>* element) { _element = element; }
-
-	//получить значение
-	Element<T>& operator*() const
+	// методы работы с итераторами
+	// присваивание
+	ListIterator &operator=(const ListIterator &it)
 	{
-		if(_element == nullptr)
+		_element = it._element;
+		return *this;
+	}
+	ListIterator &operator=(Element<T> *p)
+	{
+		_element = p;
+		return *this;
+	}
+
+	// проверка итераторов на равенство
+	bool operator!=(ListIterator const &other) const { return _element != other._element; }
+	bool operator==(ListIterator const &other) const { return _element == other._element; }
+
+	Element<T> *GetElement() const { return _element; }
+	void SetElement(Element<T> *element) { _element = element; }
+
+	// получить значение
+	Element<T> &operator*() const
+	{
+		if (_element == nullptr)
 			throw runtime_error("Invalid pointer");
 
 		return *_element;
 	}
-	//перемещение с помощью итераторов
-	ListIterator& operator++() { _element = _element->GetNext();  return *this; } //Префиксный ++
-	ListIterator& operator++(int _) { _element = _element->GetNext(); return *this; } //Постфиксный ++
-	ListIterator& operator--() { _element = _element->GetPrevious();  return *this; } //Префиксный --
-	ListIterator& operator--(int _) { _element = _element->GetPrevious(); return *this; } //Постфиксный --
+	// перемещение с помощью итераторов
+	ListIterator &operator++()
+	{
+		_element = _element->GetNext();
+		return *this;
+	} // Префиксный ++
+	ListIterator operator++(int)
+	{
+		ListIterator it(*this);
+		_element = _element->GetNext() return it;
+	} // Постфиксный ++
+	ListIterator &operator--()
+	{
+		_element = _element->GetPrevious();
+		return *this;
+	} // Префиксный --
+	ListIterator operator--(int)
+	{
+		ListIterator it(*this);
+		_element = _element->GetPrevious() return it;
+	} // Постфиксный --
 
 private:
-	//текущий элемент
-	Element<T>* _element;
+	// текущий элемент
+	Element<T> *_element;
 };
 
 /*Постройте шаблон класса двусвязного списка путём наследования от
 класса IteratedLinkedList.*/
 
-//класс итерируемый список - наследник связного списка, родитель для Очереди и Стека
+// класс итерируемый список - наследник связного списка, родитель для Очереди и Стека
 template <class T>
 class IteratedLinkedList : public LinkedList<T>
 {
 public:
-	IteratedLinkedList() : LinkedList<T>() { }
-	virtual ~IteratedLinkedList() { }
+	IteratedLinkedList() : LinkedList<T>() {}
+	virtual ~IteratedLinkedList() {}
 
-	ListIterator<T> begin() { ListIterator<T> it = LinkedList<T>::_head; return it; }
-	ListIterator<T> end() { ListIterator<T> it = LinkedList<T>::_tail; return it; }
+	ListIterator<T> begin()
+	{
+		ListIterator<T> it = LinkedList<T>::_head;
+		return it;
+	}
+	ListIterator<T> end()
+	{
+		ListIterator<T> it = LinkedList<T>::_tail;
+		return it;
+	}
 };
 
 template <class T>
 class Stack : public IteratedLinkedList<T>
 {
 public:
-	Stack() : IteratedLinkedList<T>() { }
+	Stack() : IteratedLinkedList<T>() {}
 	/*Реализуйте функции добавления элемента push() и
 	удаления элемента pop() в классе-наследнике D (для четных вариантов D –
 	Стек, для нечетных – Очередь) согласно схеме: для класса Стек элементы
 	добавляются в конец, извлекаются с конца; для класса Очереди элементы
 	добавляются в конец, извлекаются с начала. */
-	Element<T>* Push(T value) //To the end
+	Element<T> *Push(T value) // To the end
 	{
-		Element<T>* elem = new Element<T>(value);
+		Element<T> *elem = new Element<T>(value);
 
 		if (this->_tail == nullptr)
 			this->_head = this->_tail = elem;
@@ -315,7 +357,7 @@ public:
 			elem->SetPrevious(this->_tail);
 			this->_tail = elem;
 		}
-		
+
 		this->_count++;
 
 		return elem;
@@ -327,7 +369,7 @@ public:
 
 		value = this->_tail->GetValue();
 
-		Element<T>* prev = this->_tail->GetPrevious();
+		Element<T> *prev = this->_tail->GetPrevious();
 		prev->SetNext(nullptr);
 
 		this->_tail->SetPrevious(nullptr);
@@ -339,20 +381,20 @@ public:
 
 	ListIterator<T> Insert(ListIterator<T> it, T value)
 	{
-		Element<T>* inserted = Insert(it.GetElement(),value);
-		
-		if(inserted != nullptr)
+		Element<T> *inserted = Insert(it.GetElement(), value);
+
+		if (inserted != nullptr)
 			it = inserted;
 
 		return it;
 	}
-	
-	Element<T>* Insert(Element<T>* current, T value)
+
+	Element<T> *Insert(Element<T> *current, T value)
 	{
 		if (this->_tail == current)
 			return Stack<T>::Push(value);
 
-		Element<T>* elem = new Element<T>(value);
+		Element<T> *elem = new Element<T>(value);
 
 		if (current == nullptr)
 		{
@@ -361,47 +403,47 @@ public:
 			this->_head = elem;
 			return elem;
 		}
-		
+
 		elem->SetNext(current->GetNext());
 		current->GetNext()->SetPrevious(elem);
 
 		current->SetNext(elem);
 
 		elem->SetPrevious(current);
-		
+
 		this->_count++;
 
 		return elem;
 	}
 
-	//Push, Pop, Remove, Insert
+	// Push, Pop, Remove, Insert
 	virtual ListIterator<T> Remove(ListIterator<T> it)
 	{
-		if(it.GetElement() == nullptr)
+		if (it.GetElement() == nullptr)
 		{
 			Pop();
 			return it;
 		}
-		Element<T>* elem = it.GetElement();
+		Element<T> *elem = it.GetElement();
 		it--;
 		Remove(elem);
 		return it;
 	}
 
-	virtual Element<T>* Remove(Element<T> * elem)
+	virtual Element<T> *Remove(Element<T> *elem)
 	{
 		Element<T> *prev = elem->GetPrevious(), *next = elem->GetNext();
 
-		if(elem == this->_head)
+		if (elem == this->_head)
 			this->_head = next;
 
-		if(elem == this->_tail)
+		if (elem == this->_tail)
 			this->_tail = prev;
 
-		if(next != nullptr)
+		if (next != nullptr)
 			next->SetPrevious(prev);
 
-		if(prev != nullptr)
+		if (prev != nullptr)
 			prev->SetNext(next);
 
 		this->_count--;
@@ -414,10 +456,10 @@ public:
 	наследования) и возвращающего список произвольного типа (тип
 	обрабатываемого списка не обязан совпадать с типом списка-результата).
 	*/
-	virtual void Filter(LinkedList<T>& list,bool (*filter)(T))
+	virtual void Filter(LinkedList<T> &list, bool (*filter)(T))
 	{
-		for(Element<T>* elem = this->_head; elem != nullptr; elem = elem->GetNext())
-			if(filter(elem->GetValue()))
+		for (Element<T> *elem = this->_head; elem != nullptr; elem = elem->GetNext())
+			if (filter(elem->GetValue()))
 				list.Push(elem->GetValue());
 	}
 
@@ -425,12 +467,11 @@ public:
 	virtual Stack<T> Filter(bool (*filter)(T))
 	{
 		Stack<T> result;
-		
-		Filter(result,filter);
+
+		Filter(result, filter);
 
 		return result;
 	}
-
 };
 
 // Постройте наследник класса D. Переопределите функцию добавления
@@ -439,52 +480,57 @@ template <class T>
 class SortedStack : public Stack<T>
 {
 public:
-	SortedStack() : Stack<T>() { }
+	SortedStack() : Stack<T>() {}
 
-	virtual Element<T>* Push(T value)
+	virtual Element<T> *Push(T value)
 	{
-		if(this->_head == nullptr || this->_tail->GetValue() < value)
+		if (this->_head == nullptr || this->_tail->GetValue() < value)
 			return Stack<T>::Push(value);
 
-		for(Element<T>* element = this->_head; element != nullptr; element = element->GetNext())
-			if(value < element->GetValue())
-				return Stack<T>::Insert(element->GetPrevious(),value);
+		for (Element<T> *element = this->_head; element != nullptr; element = element->GetNext())
+			if (value < element->GetValue())
+				return Stack<T>::Insert(element->GetPrevious(), value);
 	}
 };
 
-
 bool older_filter(Student stud)
 {
-	return stud._birthday <= 2004;	
+	return stud._birthday <= 2004;
 }
 
 int main()
 {
 	SortedStack<int> nums;
 
-	for(int i = 0;i < 25;i+=3)
+	for (int i = 0; i < 25; i += 3)
 		nums.Push(i % 7);
 
-	cout << "Count: " << nums.Count() << endl << nums << endl << "Popped: " << nums.Pop() << endl;
-	
+	cout << "Count: " << nums.Count() << endl
+		 << nums << endl
+		 << "Popped: " << nums.Pop() << endl;
+
 	ListIterator<int> num_it = nums.begin();
-	num_it++; num_it++; num_it++;
+	num_it++;
+	num_it++;
+	num_it++;
 	nums.Remove(num_it);
-	cout << "After remove: " << endl << nums << endl;
-	
+	cout << "After remove: " << endl
+		 << nums << endl;
+
 	Stack<Student> students;
-	students.Push(Student("Danya","Lykov","Branks",true,2007,8));
-	students.Push(Student("Vika","Kuslieva","Moscow",false,2006,7));
-	students.Push(Student("Sanya","Lazarev","Moscow",true,2005,6));
-	students.Push(Student("Yarik","Malysh","Zamkad",true,2004,5));
-	students.Push(Student("Nastya","Pak","kiev",false,2003,4));
+	students.Push(Student("Danya", "Lykov", "Branks", true, 2007, 8));
+	students.Push(Student("Vika", "Kuslieva", "Moscow", false, 2006, 7));
+	students.Push(Student("Sanya", "Lazarev", "Moscow", true, 2005, 6));
+	students.Push(Student("Yarik", "Malysh", "Zamkad", true, 2004, 5));
+	students.Push(Student("Nastya", "Pak", "kiev", false, 2003, 4));
 	cout << students << endl;
 
 	SortedStack<Student> olders;
 
-	students.Filter(olders,older_filter);
+	students.Filter(olders, older_filter);
 
-	cout << "Olders: " << endl << olders << endl;
+	cout << "Olders: " << endl
+		 << olders << endl;
 
 	return 0;
 }

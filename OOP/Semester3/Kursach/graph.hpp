@@ -3,19 +3,15 @@
 
 using namespace std;
 
-template<class T>
-class Graph
+namespace Untitled
 {
-public:
-	class Node;
+	template<class T>
+	class NodeGraph;
 
-private:
-	vector<Node> _nodes;
-
-public:
+	template<class T>
 	class Node
 	{
-		friend class Graph;
+		friend class NodeGraph;
 
 	private:
 		T _data;
@@ -27,11 +23,8 @@ public:
 
 		Node& operator=(const Node& other) { _data = other._data; }
 
-		T GetData() const { return _data; }
-		void SetData(T data) { _data = data; }
-
-		const vector<Node*>& GetNeighbours() const { return _neighbours; }
-		vector<Node*>& GetNeighbours() { return _neighbours; }
+		const vector<Node*>& Neighbours() const { return _neighbours; }
+		vector<Node*>& Neighbours() { return _neighbours; }
 
 		Link(Node* node)
 		{
@@ -41,8 +34,16 @@ public:
 
 		const T& operator*() const { return _data; }
 		T& operator*() { return _data; }
-	}
+	};
 
-	const vector<Node*> GetNodes() const { return _nodes; }
-	vector<Node*>& GetNodes() { return _nodes; }
-};
+	template<class T>
+	class NodeGraph
+	{
+	protected:
+		vector<Node<T>> _nodes;
+
+	public:
+		const vector<Node<T>*>& Nodes() const { return _nodes; }
+		vector<Node<T>*>& Nodes() { return _nodes; }
+	};
+}
