@@ -294,7 +294,8 @@ public:
 	ListIterator operator++(int)
 	{
 		ListIterator it(*this);
-		_element = _element->GetNext() return it;
+		_element = _element->GetNext();
+		return it;
 	} // Постфиксный ++
 	ListIterator &operator--()
 	{
@@ -304,7 +305,8 @@ public:
 	ListIterator operator--(int)
 	{
 		ListIterator it(*this);
-		_element = _element->GetPrevious() return it;
+		_element = _element->GetPrevious();
+		return it;
 	} // Постфиксный --
 
 private:
