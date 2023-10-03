@@ -121,3 +121,79 @@ Node<K, V> *Node<K, V>::Predecessor() const
 
 	return current->_parent;
 }
+
+// дописать класс итератора по списку
+template <typename K, typename V>
+class TreeIterator : public std::iterator<input_iterator_tag, K>
+{
+public:
+	// конструкторы
+	TreeIterator() { _node = nullptr; }
+	TreeIterator(Node<K, V> *p) { _node = p; }
+	TreeIterator(const TreeIterator &it) { _node = it._node; }
+
+	// методы работы с итераторами
+	// присваивание
+	TreeIterator &operator=(const TreeIterator &it)
+	{
+		_node = it._node;
+		return *this;
+	}
+	TreeIterator &operator=(Node<K, V> *p)
+	{
+		_node = p;
+		return *this;
+	}
+
+	// проверка итераторов на равенство
+	bool operator!=(TreeIterator const &other) const { return _node != other._node; }
+	bool operator==(TreeIterator const &other) const { return _node == other._node; }
+
+	Node<K, V> *GetNode() const { return _node; }
+	void SetNode(Node<K, V> *node) { _node = node; }
+
+	// получить значение
+	Node<K, V> &operator*()
+	{
+		if (_node == nullptr)
+			throw std::runtime_error("Invalid pointer");
+
+		return _node;
+	}
+	// получить значение
+	const Node<K, V> &operator*() const
+	{
+		if (_node == nullptr)
+			throw std::runtime_error("Invalid pointer");
+
+		return _node;
+	}
+
+	// перемещение с помощью итераторов
+	TreeIterator &operator++()
+	{
+		_node = _node->Successor();
+		return *this;
+	} // Префиксный ++
+	TreeIterator operator++(int)
+	{
+		TreeIterator it(*this);
+		_node = _node->Successor();
+		return it;
+	} // Постфиксный ++
+	TreeIterator &operator--()
+	{
+		_node = _node->Predecessor();
+		return *this;
+	} // Префиксный --
+	TreeIterator operator--(int)
+	{
+		TreeIterator it(*this);
+		_node = _node->Predecessor();
+		return it;
+	} // Постфиксный --
+
+private:
+	// текущий элемент
+	Node<K, V> *_node;
+};
