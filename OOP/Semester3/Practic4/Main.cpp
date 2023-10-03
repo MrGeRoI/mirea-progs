@@ -1,15 +1,20 @@
 #include <string>
 
+#include "../Student.hpp"
 #include "SplayTree.hpp"
-#include "Residue.hpp"
+
+using namespace std;
 
 template<class K,class V>
 void print(Node<K,V>* node)
 {
-	std::cout << std::endl << node->GetKey() << "\tHeight: " << get_height(node);
+	cout << endl << node->GetKey() << node->GetValue() << endl;
 }
 
 int main()
 {
+	SplayTree<string,Student> tree;
+
+	tree.Push("",)
 	return 0;
 }

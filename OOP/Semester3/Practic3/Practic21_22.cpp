@@ -130,6 +130,7 @@ vector<V> bykey(const multimap<K,V>& source, K key)
 
 	return result;
 }
+
 int main()
 {
 	map<string, int> marks;

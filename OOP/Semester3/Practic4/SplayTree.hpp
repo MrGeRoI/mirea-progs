@@ -44,15 +44,11 @@ Node<K,V>* SplayTree<K,V>::Splay(Node<K,V>* node)
 	{
 		if( (grand->GetLeft() == parent) == (parent->GetLeft() == node) )
 		{
-			
-
 			Tree<K,V>::Rotate(grand, parent);
 			Tree<K,V>::Rotate(parent, node);
 		}
 		else
 		{
-			
-
 			Tree<K,V>::Rotate(parent, node);
 			Tree<K,V>::Rotate(grand, node);
 		}

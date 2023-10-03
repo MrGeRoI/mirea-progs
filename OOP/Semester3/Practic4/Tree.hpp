@@ -91,16 +91,14 @@ protected:
 
 	Node<K, V> *RotateLeft(Node<K, V> *node) { return Rotate(node, node->GetLeft()); };
 
+	virtual Node<K, V> *Push(K key, V value, Node<K, V> *current);
+
 public:
 	virtual Node<K, V> *GetRoot() const { return _root; }
 
 	Tree<K, V>() { _root = nullptr; }
 
-	virtual Node<K, V> *Push(K key, V value) { return Push(new Node<K, V>(key, value)); }
-
-	virtual Node<K, V> *Push(Node<K, V> *node) { return Push(node, _root); }
-
-	virtual Node<K, V> *Push(Node<K, V> *node, Node<K, V> *current);
+	virtual Node<K, V> *Push(K key, V value) { Push(key, value, _root) };
 
 	virtual Node<K, V> *Remove(Node<K, V> *node);
 
@@ -112,9 +110,9 @@ public:
 
 	virtual Node<K, V> *Find(K key, Node<K, V> *current) const;
 
-	virtual Node<K, V> *Find(bool (*find)(K,V)) const;
+	virtual Node<K, V> *Find(bool (*find)(K, V)) const;
 
-	virtual Node<K, V> *Find(bool (*find)(K,V), Node<K, V> *current) const;
+	virtual Node<K, V> *Find(bool (*find)(K, V), Node<K, V> *current) const;
 
 	virtual V operator[](K key) const { return Find(key)->GetValue(); }
 
@@ -136,46 +134,44 @@ public:
 };
 
 template <class K, class V>
-Node<K, V> *Tree<K, V>::Push(Node<K, V> *node, Node<K, V> *current)
+Node<K, V> *Tree<K, V>::Push(K key, V value, Node<K, V> *current)
 {
-
-	if (node == nullptr)
-		return nullptr;
-
 	if (current == nullptr)
 		current = _root;
 
 	if (_root == nullptr)
-	{
-		_root = node;
-		return _root;
-	}
+		return _root = new Node<K, V>(key, value);
 
-	if (current->GetKey() > node->GetKey())
-	{
+	if (current->GetKey() == key)
+		return current;
 
+	if (current->GetKey() > key)
+	{
 		if (current->GetLeft() != nullptr)
 			return Push(node, current->GetLeft());
 		else
 		{
+			Node<K, V>* node = new Node<K, V>(key, value);
 			current->SetLeft(node);
 			node->SetParent(current);
+			return node;
 		}
 	}
-
-	if (current->GetKey() < node->GetKey())
+	
+	//if (current->GetKey() < key)
+	//{
+	if (current->GetRight() != nullptr)
+		return Push(node, current->GetRight());
+	else
 	{
-
-		if (current->GetRight() != nullptr)
-			return Push(node, current->GetRight());
-		else
-		{
-			current->SetRight(node);
-			node->SetParent(current);
-		}
+		Node<K, V>* node = new Node<K, V>(key, value);
+		current->SetRight(node);
+		node->SetParent(current);
+		return node;
 	}
+	//}
 
-	return node;
+	return nullptr;
 }
 
 template <class K, class V>
@@ -304,18 +300,18 @@ Node<K, V> *Tree<K, V>::Find(K key, Node<K, V> *current) const
 // В функции поиска вместо операции == используйте вызов функции
 // сравнения по указателю на функцию, передаваемому в функцию find().
 template <class K, class V>
-Node<K, V> *Tree<K, V>::Find(bool (*find)(K,V), Node<K, V> *current) const
+Node<K, V> *Tree<K, V>::Find(bool (*find)(K, V), Node<K, V> *current) const
 {
 	if (current != nullptr)
-		if(find(current->GetKey(), current->GetValue()))
+		if (find(current->GetKey(), current->GetValue()))
 			return current;
 
 	if (current != nullptr && current->GetLeft() != nullptr)
-		Find(find,node->GetLeft());
+		Find(find, node->GetLeft());
 
 	if (current != nullptr && current->GetRight() != nullptr)
-		Find(find,node->GetRight());
-	
+		Find(find, node->GetRight());
+
 	return nullptr;
 }
 template <class K, class V>
