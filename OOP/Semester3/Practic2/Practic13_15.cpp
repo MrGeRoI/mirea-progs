@@ -18,9 +18,8 @@ public:
 
 	Student()
 	{
-		_male = 0;
-		_birthday = 0;
-		_grade = 0;
+		_male = true;
+		_birthday = _grade = 0;
 	}
 
 	Student(const char *firstname, const char *lastname, const char *address, bool male, int birthday, int grade)

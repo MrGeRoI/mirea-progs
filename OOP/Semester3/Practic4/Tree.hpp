@@ -1,83 +1,9 @@
+#pragma once
+
 #include <iostream>
 #include <fstream>
 
 #include "Node.hpp"
-
-// дописать класс итератора по списку
-template <typename K, typename V>
-class TreeIterator : public std::iterator<input_iterator_tag, K>
-{
-public:
-	// конструкторы
-	TreeIterator() { _node = nullptr; }
-	TreeIterator(Node<K, V> *p) { _node = p; }
-	TreeIterator(const TreeIterator &it) { _node = it._node; }
-
-	// методы работы с итераторами
-	// присваивание
-	TreeIterator &operator=(const TreeIterator &it)
-	{
-		_node = it._node;
-		return *this;
-	}
-	TreeIterator &operator=(Node<K, V> *p)
-	{
-		_node = p;
-		return *this;
-	}
-
-	// проверка итераторов на равенство
-	bool operator!=(TreeIterator const &other) const { return _node != other._node; }
-	bool operator==(TreeIterator const &other) const { return _node == other._node; }
-
-	Node<K, V> *GetNode() const { return _node; }
-	void SetNode(Node<K, V> *node) { _node = node; }
-
-	// получить значение
-	Node<K, V> &operator*()
-	{
-		if (_node == nullptr)
-			throw std::runtime_error("Invalid pointer");
-
-		return _node;
-	}
-	// получить значение
-	const Node<K, V> &operator*() const
-	{
-		if (_node == nullptr)
-			throw std::runtime_error("Invalid pointer");
-
-		return _node;
-	}
-
-	// перемещение с помощью итераторов
-	TreeIterator &operator++()
-	{
-		_node = _node->Successor();
-		return *this;
-	} // Префиксный ++
-	TreeIterator operator++(int)
-	{
-		TreeIterator it(*this);
-		_node = _node->Successor();
-		return it;
-	} // Постфиксный ++
-	TreeIterator &operator--()
-	{
-		_node = _node->Predecessor();
-		return *this;
-	} // Префиксный --
-	TreeIterator operator--(int)
-	{
-		TreeIterator it(*this);
-		_node = _node->Predecessor();
-		return it;
-	} // Постфиксный --
-
-private:
-	// текущий элемент
-	Node<K, V> *_node;
-};
 
 template <class K, class V>
 class Tree
@@ -98,7 +24,7 @@ public:
 
 	Tree<K, V>() { _root = nullptr; }
 
-	virtual Node<K, V> *Push(K key, V value) { Push(key, value, _root) };
+	virtual Node<K, V> *Push(K key, V value) { Push(key, value, _root); }
 
 	virtual Node<K, V> *Remove(Node<K, V> *node);
 
@@ -110,7 +36,7 @@ public:
 
 	virtual Node<K, V> *Find(K key, Node<K, V> *current) const;
 
-	virtual Node<K, V> *Find(bool (*find)(K, V)) const;
+	virtual Node<K, V> *Find(bool (*find)(K, V)) const { return Find(find, _root); }
 
 	virtual Node<K, V> *Find(bool (*find)(K, V), Node<K, V> *current) const;
 
@@ -128,9 +54,9 @@ public:
 
 	virtual void PostOrder(void (*func)(Node<K, V> *)) const { PostOrder(_root, func); }
 
-	virtual TreeIterator begin() { return TreeIterator(Minimum()); }
+	virtual TreeIterator<K, V> begin() { return TreeIterator(Minimum()); }
 
-	virtual TreeIterator end() { return TreeIterator(Maximum()); }
+	virtual TreeIterator<K, V> end() { return TreeIterator(Maximum()); }
 };
 
 template <class K, class V>
@@ -148,23 +74,23 @@ Node<K, V> *Tree<K, V>::Push(K key, V value, Node<K, V> *current)
 	if (current->GetKey() > key)
 	{
 		if (current->GetLeft() != nullptr)
-			return Push(node, current->GetLeft());
+			return this->Push(key, value, current->GetLeft());
 		else
 		{
-			Node<K, V>* node = new Node<K, V>(key, value);
+			Node<K, V> *node = new Node<K, V>(key, value);
 			current->SetLeft(node);
 			node->SetParent(current);
 			return node;
 		}
 	}
-	
-	//if (current->GetKey() < key)
+
+	// if (current->GetKey() < key)
 	//{
 	if (current->GetRight() != nullptr)
-		return Push(node, current->GetRight());
+		return Push(key, value, current->GetRight());
 	else
 	{
-		Node<K, V>* node = new Node<K, V>(key, value);
+		Node<K, V> *node = new Node<K, V>(key, value);
 		current->SetRight(node);
 		node->SetParent(current);
 		return node;
@@ -307,10 +233,10 @@ Node<K, V> *Tree<K, V>::Find(bool (*find)(K, V), Node<K, V> *current) const
 			return current;
 
 	if (current != nullptr && current->GetLeft() != nullptr)
-		Find(find, node->GetLeft());
+		Find(find, current->GetLeft());
 
 	if (current != nullptr && current->GetRight() != nullptr)
-		Find(find, node->GetRight());
+		Find(find, current->GetRight());
 
 	return nullptr;
 }

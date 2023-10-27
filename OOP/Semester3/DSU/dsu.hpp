@@ -1,70 +1,84 @@
 #include <vector>
 #include <map>
+#include <stdexcept>
+#include <unordered_map>
 
-namespace untitled
+namespace
 {
 	template <typename T>
 	class dsu
 	{
 	protected:
-		struct union_node
+		struct node
 		{
-		private:
-			T _value;
-
-			union_node *_parent;
-
 		public:
-			union_node(T val)
+			node *_parent;
+			int _rank,_size;
+
+			node(T val)
 			{
-				_value = val;
-				_parent = this;
-				_left = _right = nullptr;
+				_parent = val;
+
+				_rank = 0;
 			}
+		};
 
-			T &operator*() { return _value; }
-			union_node *&parent() { return _parent; }
-			union_node *&left() { return _left; }
-			union_node *&right() { return _right; }
+		node **_root;
+		size_t _count;
 
-			const T &operator*() const { return _value; }
-			const union_node *&parent() const { return _parent; }
-			const union_node *&left() const { return _left; }
-			const union_node *&right() const { return _right; }
-		}
+		std::unordered_map<T, node> _dsu;
 
-		std::vector<union_node *>
-			_parent;
-
-		union_node *find(T value) { return find(value, _parent); }
-
-		union_node *find(T value, union_node *node);
-
-		void add(union_node *parent)
+		node *find_node(node *current)
 		{
+			if (current->_parent == current)
+				return current;
+
+			return find_node(current._parent);
 		}
 
 	public:
-		// union в C++ ключевое слово, так что нельзя называть
-		void union_(T major, T minor)
+		dsu(){};
+
+		void unite_sets(T major, T minor)
 		{
-			for (union_node *node : _parent)
-				if (*node == major)
-					add(major, minor);
+			node &a = _dsu.at(major);
+			node &b = _dsu.at(minor);
+		
+			if (a._parent == b._parent)
+				return;
+
+			if (a._rank < b._rank)
+				std::swap(a, b);
+
+			b._parent = major;
+
+			if (a._rank == b._rank)
+				a._rank++;
 		}
 
 		void make_set(T value)
 		{
-			// Если он уже есть в каком-то дереве, то поставить его в корень
+			_dsu[value]._parent = value;
 		}
 
-		void reassign_set(T value)
+		T find_set(T value)
 		{
+			node &data = _dsu.at(value);
 
+			if (value == data._parent)
+				return value;
+
+			return data._parent = find_set(data._parent);
 		}
- 
-		T find(T value)
+
+		T find_set(T value) const
 		{
+			node &data = _dsu.at(value);
+
+			if (value == data._parent)
+				return value;
+
+			return find_set(data._parent);
 		}
 
 		T &operator[](T value);
@@ -73,26 +87,29 @@ namespace untitled
 		const T &at(T value) const;
 	};
 
+	// find_set/make_set
 	template <typename T>
 	T &dsu<T>::operator[](T value)
 	{
-		union_node *node = find(value);
+		node &data = _dsu[value];
 
-		if (node)
-			return *node;
+		if (value == data._parent)
+			return data._parent;
 
-		make_set(value);
-
-		return value;
+		return operator[](data._parent);
 	}
 
 	template <typename T>
 	T &dsu<T>::at(T value)
 	{
-		union_node *node = find(value);
-
-		if (node)
-			return *node;
+		try
+		{
+			return _dsu.at(value);
+		}
+		catch (const std::out_of_range &out)
+		{
+			throw out;
+		}
 
 		throw std::invalid_argument("T &dsu<T>::at(T value)");
 	}
@@ -100,13 +117,16 @@ namespace untitled
 	template <typename T>
 	const T &dsu<T>::at(T value) const
 	{
-		union_node *node = find(value);
-
-		if (node)
-			return *node;
+		try
+		{
+			return _dsu.at(value);
+		}
+		catch (const std::out_of_range &out)
+		{
+			throw out;
+		}
 
 		throw std::invalid_argument("T &dsu<T>::at(T value)");
 	}
 
-	
 }

@@ -1,3 +1,5 @@
+#pragma once
+
 #include <iostream>
 
 template <class K, class V>
@@ -72,27 +74,24 @@ std::ostream &operator>>(std::ostream &stream, Node<K, V> &node)
 template <class K, class V>
 Node<K, V> *Node<K, V>::Minimum() const
 {
-
 	if (GetLeft() != nullptr)
 		return GetLeft()->Minimum();
 
-	return this;
+	return (Node<K, V> *)this;
 }
 
 template <class K, class V>
 Node<K, V> *Node<K, V>::Maximum() const
 {
-
 	if (GetRight() != nullptr)
 		return GetRight()->Maximum();
 
-	return this;
+	return (Node<K, V> *)this;
 }
 
 template <class K, class V>
 Node<K, V> *Node<K, V>::Successor() const
 {
-
 	if (_right != nullptr)
 		return _right->Minimum();
 
@@ -114,7 +113,7 @@ Node<K, V> *Node<K, V>::Predecessor() const
 	if (_parent == nullptr)
 		return nullptr;
 
-	Node<K, V> *current = this;
+	Node<K, V> *current = (Node<K, V> *)this;
 
 	while (current->_parent != nullptr && current->_parent->_left == current)
 		current = current->_parent;
@@ -124,7 +123,7 @@ Node<K, V> *Node<K, V>::Predecessor() const
 
 // дописать класс итератора по списку
 template <typename K, typename V>
-class TreeIterator : public std::iterator<input_iterator_tag, K>
+class TreeIterator : public std::iterator<std::input_iterator_tag, K>
 {
 public:
 	// конструкторы

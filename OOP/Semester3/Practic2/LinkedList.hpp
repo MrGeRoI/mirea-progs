@@ -31,7 +31,7 @@ public:
 	virtual void SetValue(T value) { _value = value; }
 
 	template <class T1>
-	friend ostream &operator<<(ostream &stream, const Element<T1> &obj);
+	friend std::ostream &operator<<(std::ostream &stream, const Element<T1> &obj);
 
 	Element(T value)
 	{
@@ -41,7 +41,7 @@ public:
 };
 
 template <class T>
-ostream &operator<<(ostream &stream, const Element<T> &obj)
+std::ostream &operator<<(std::ostream &stream, const Element<T> &obj)
 {
 	return stream << obj._value;
 }
@@ -105,18 +105,18 @@ public:
 	}
 
 	template <class T1>
-	friend ofstream &operator<<(ofstream &stream, const LinkedList<T1> &obj);
+	friend std::ofstream &operator<<(std::ofstream &stream, const LinkedList<T1> &obj);
 	template <class T1>
-	friend ostream &operator<<(ostream &stream, const LinkedList<T1> &obj);
+	friend std::ostream &operator<<(std::ostream &stream, const LinkedList<T1> &obj);
 	template <class T1>
-	friend istream &operator>>(istream &stream, LinkedList<T1> &obj);
+	friend std::istream &operator>>(std::istream &stream, LinkedList<T1> &obj);
 };
 
 /*Петрусевич, какого хуя тут такие костыли, ты долбаёб?
 Надо просто сделать перегрузки функций ввода/ввывода из файла и консоли
-для типов ostream и ofstream*/
+для типов std::ostream и std::ofstream*/
 template <class T>
-ofstream &operator<<(ofstream &stream, const LinkedList<T> &obj)
+std::ofstream &operator<<(std::ofstream &stream, const LinkedList<T> &obj)
 {
 	stream << obj._count << "\n";
 	for (Element<T> *current = obj.GetBegin(); current != nullptr; current = current->GetNext())
@@ -125,7 +125,7 @@ ofstream &operator<<(ofstream &stream, const LinkedList<T> &obj)
 }
 
 template <class T>
-ostream &operator<<(ostream &stream, const LinkedList<T> &obj)
+std::ostream &operator<<(std::ostream &stream, const LinkedList<T> &obj)
 {
 	for (Element<T> *current = obj.GetBegin(); current != nullptr; current = current->GetNext())
 		stream << current->GetValue() << "\n";
@@ -134,7 +134,7 @@ ostream &operator<<(ostream &stream, const LinkedList<T> &obj)
 }
 
 template <class T>
-istream &operator>>(istream &stream, LinkedList<T> &list)
+std::istream &operator>>(std::istream &stream, LinkedList<T> &list)
 {
 	// чтение из файла и консоли совпадают
 	stream >> list._count;
@@ -160,7 +160,7 @@ istream &operator>>(istream &stream, LinkedList<T> &list)
 
 // дописать класс итератора по списку
 template <typename T>
-class ListIterator : public iterator<input_iterator_tag, T>
+class ListIterator : public std::iterator<std::input_iterator_tag, T>
 {
 public:
 	// конструкторы
