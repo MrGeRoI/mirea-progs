@@ -1,149 +1,114 @@
 #pragma once
 
 #include <iostream>
+#include <stdexcept>
 
-class HeapExcepction : std::exception
-{
-public:
-	virtual const char* what() const noexcept override { return "HeapExcepction"; };
-};
-
-class IndexOutOfBoundsExcepction : HeapExcepction
-{
-public:
-	int _index;
-
-	IndexOutOfBoundsExcepction(int i) { _index = i; }
-
-	virtual const char* what() const noexcept override { return "IndexOutOfBoundsExcepction"; };
-};
-
-//куча (heap)
 template <class T>
 class Heap
 {
 private:
-	//массив
-	T* _array;
-	//сколько элементов добавлено
-	int _length;
-	//сколько памяти выделено
-	int _size;
+	T *m_pArray;
+
+	int m_iLength;
+
+	int m_iSize;
+
+	void swap(int index1, int index2);
+
+	T getLeftChild(int index) { return m_pArray[getLeftChildIndex(index)]; }
+
+	T getRightChild(int index) { return m_pArray[getRightChildIndex(index)]; }
+
+	T getParent(int index) { return m_pArray[getParentIndex(index)]; }
+
+	int getLeftChildIndex(int index);
+
+	int getRightChildIndex(int index);
+
+	int getParentIndex(int index);
+
+	void siftUp(int index = -1);
+
+	void siftDown(int index = 0);
+
+	void heapify(int index = 0) { siftDown(index); };
+
 public:
+	int getCapacity() { return m_iSize; }
+	int getCount() { return m_iLength; }
 
-	//доступ к вспомогательным полям кучи и оператор индекса
-	int GetCapacity() { return _size; }
-	int GetCount() { return _length; }
+	T &operator[](int index);
 
-	T& operator[](int index);
+	const T &operator[](int index) const;
 
-	//конструктор
 	Heap<T>(int memory = 100)
 	{
-		_array = new T[memory];
-		_length = 0;
-		_size = memory;
+		m_pArray = new T[memory];
+		m_iLength = 0;
+		m_iSize = memory;
 	}
 
-	//поменять местами элементы _array[index1], _array[index2]
-	void Swap(int index1, int index2);
-
-	//функции получения левого, правого дочернего элемента, родителя или их индексов в массиве
-	T GetLeftChild(int index) { return _array[GetLeftChildIndex(index)]; }
-
-	T GetRightChild(int index) { return _array[GetRightChildIndex(index)]; }
-
-	T GetParent(int index) { return _array[GetParentIndex(index)]; }
-
-	int GetLeftChildIndex(int index);
-
-	int GetRightChildIndex(int index);
-
-	int GetParentIndex(int index);
-
-	//просеить элемент вверх
-	void SiftUp(int index = -1);
-
-	void SiftDown(int index = 0);
-
-	//восстановление свойств кучи после удаления или добавления элемента
-	void Heapify(int index = 0) { SiftDown(index); };
-
-	//добавление элемента - вставляем его в конец массива и просеиваем вверх
 	void Push(T N);
 
 	void Remove(int index);
 
-	T ExtractMin();
+	T extractMin();
 
-	T ExtractMax();
+	void straight(void (*func)(T));
 
-	//перечислить элементы кучи и применить к ним функцию
-	void Straight(void(*func)(T));
+	template <class T1>
+	friend std::ostream &operator<<(std::ostream &stream, const Heap<T1> &node);
 
-	//перебор элементов, аналогичный проходам бинарного дерева
-	void PreOrder(void(*func)(T), int index = 0);
-
-	void InOrder(void(*func)(T), int index = 0);
-
-	void PostOrder(void(*func)(T), int index = 0);
-
-	template<class T1>
-	friend std::ostream& operator<<(std::ostream& stream,const Heap<T1>& node);
-
-	~Heap() { delete[] _array; };
+	~Heap() { delete[] m_pArray; };
 };
 
 template <class T>
-T& Heap<T>::operator[](int index)
+T &Heap<T>::operator[](int index)
 {
-	if (index < 0 || index >= _length)
-		throw IndexOutOfBoundsExcepction(index);//?
+	if (index < 0 || index >= m_iLength)
+		throw std::out_of_range;
 
-	return _array[index];
+	return m_pArray[index];
 }
 
 template <class T>
-void Heap<T>::Swap(int index1, int index2)
+void Heap<T>::swap(int index1, int index2)
 {
-	if (index1 < 0 || index1 >= _length)
-		throw IndexOutOfBoundsExcepction(index1);
-		
-	if (index2 < 0 || index2 >= _length)
-		throw IndexOutOfBoundsExcepction(index2);
-	//здесь нужна защита от дурака
+	if (index1 < 0 || index1 >= m_iLength)
+		throw std::out_of_range;
+
+	if (index2 < 0 || index2 >= m_iLength)
+		throw std::out_of_range;
 
 	T temp;
-	temp = _array[index1];
-	_array[index1] = _array[index2];
-	_array[index2] = temp;
+	temp = m_pArray[index1];
+	m_pArray[index1] = m_pArray[index2];
+	m_pArray[index2] = temp;
 }
 
 template <class T>
-int Heap<T>::GetLeftChildIndex(int index)
+int Heap<T>::getLeftChildIndex(int index)
 {
-	if (index < 0 || index >= _length)
-		throw IndexOutOfBoundsExcepction(index);
-	//здесь нужна защита от дурака
+	if (index < 0 || index >= m_iLength)
+		throw std::out_of_range;
+
 	return index * 2 + 1;
 }
 
 template <class T>
-int Heap<T>::GetRightChildIndex(int index)
+int Heap<T>::getRightChildIndex(int index)
 {
-	if (index < 0 || index >= _length)
-		throw IndexOutOfBoundsExcepction(index);
-	//здесь нужна защита от дурака
+	if (index < 0 || index >= m_iLength)
+		throw std::out_of_range;
 
 	return index * 2 + 2;
 }
 
 template <class T>
-int Heap<T>::GetParentIndex(int index)
+int Heap<T>::getParentIndex(int index)
 {
-	if (index <= 0 || index >= _length)
-		throw IndexOutOfBoundsExcepction(index);
-	//здесь нужна защита от дурака
+	if (index <= 0 || index >= m_iLength)
+		throw std::out_of_range;
 
 	if (index % 2 == 0)
 		return index / 2 - 1;
@@ -152,139 +117,99 @@ int Heap<T>::GetParentIndex(int index)
 }
 
 template <class T>
-void Heap<T>::SiftUp(int index)
+void Heap<T>::siftUp(int index)
 {
 	if (index == -1)
-		index = _length - 1;
+		index = m_iLength - 1;
 
 	if (index == 0)
 		return;
 
-	int parent = GetParentIndex(index);
+	int parent = getParentIndex(index);
 
-	if (_array[index] < _array[parent])
+	if (m_pArray[index] < m_pArray[parent])
 	{
-		Swap(index, parent);
-		SiftUp(parent);
+		swap(index, parent);
+		siftUp(parent);
 	}
 }
 
 template <class T>
-void Heap<T>::SiftDown(int index)
+void Heap<T>::siftDown(int index)
 {
-	if(_length <= 0)
+	if (m_iLength <= 0)
 		return;
 
 	int maximum = index;
 
-	int left = GetLeftChildIndex(index), right = GetRightChildIndex(index);
-	
-	if (left < _length && _array[left] < _array[maximum])
+	int left = getLeftChildIndex(index), right = getRightChildIndex(index);
+
+	if (left < m_iLength && m_pArray[left] < m_pArray[maximum])
 		maximum = left;
-	
-	if (right < _length && _array[right] < _array[maximum])
+
+	if (right < m_iLength && m_pArray[right] < m_pArray[maximum])
 		maximum = right;
 
 	if (index != maximum)
 	{
-		Swap(index, maximum);
-		SiftDown(maximum);
+		swap(index, maximum);
+		siftDown(maximum);
 	}
 }
 
 template <class T>
 void Heap<T>::Push(T N)
 {
-	//добавить элемент и включить просеивание
-	if (_length < _size)
+
+	if (m_iLength < m_iSize)
 	{
-		_array[_length] = N;
-		_length++;
-		SiftUp();
+		m_pArray[m_iLength] = N;
+		m_iLength++;
+		siftUp();
 	}
 }
 
 template <class T>
 void Heap<T>::Remove(int index)
 {
-	if (index < 0 || index >= _length)
-		throw IndexOutOfBoundsExcepction(index);
+	if (index < 0 || index >= m_iLength)
+		throw std::out_of_range;
 
-	// Если удаляем последний, то просто "забываем" про него
-	if(index >= _length - 1)
+	if (index >= m_iLength - 1)
 	{
-        _length--;
-        return;
-    }
+		m_iLength--;
+		return;
+	}
 
-	Swap(index, _length - 1);
-	_length--;
-	SiftUp(index);
-	SiftDown(index);
+	swap(index, m_iLength - 1);
+	m_iLength--;
+	siftUp(index);
+	siftDown(index);
 }
 
 template <class T>
-T Heap<T>::ExtractMin()
+T Heap<T>::extractMin()
 {
-	//исключить минимум и запустить просеивание кучи
-	T res = _array[0];
-	Swap(0, _length - 1);
-	_length--;
-	Heapify();
+
+	T res = m_pArray[0];
+	swap(0, m_iLength - 1);
+	m_iLength--;
+	heapify();
 	return res;
 }
 
 template <class T>
-void Heap<T>::Straight(void(*func)(T))
+void Heap<T>::straight(void (*func)(T))
 {
-	for (int i = 0; i < _length; i++)
-		func(_array[i]);
+	for (int i = 0; i < m_iLength; i++)
+		func(m_pArray[i]);
 }
 
 template <class T>
-void Heap<T>::PreOrder(void(*func)(T), int index)
+std::ostream &operator<<(std::ostream &stream, const Heap<T> &heap)
 {
-	if (index >= 0 && index < _length)
-		func(_array[index]);
-
-	if (GetLeftChildIndex(index) < _length)
-		PreOrder(func, GetLeftChildIndex(index));
-
-	if (GetRightChildIndex(index) < _length)
-		PreOrder(func, GetRightChildIndex(index));
-}
-
-template <class T>
-void Heap<T>::InOrder(void(*func)(T), int index)
-{
-	if (GetLeftChildIndex(index) < _length)
-		PreOrder(func, GetLeftChildIndex(index));
-
-	if (index >= 0 && index < _length)
-		func(_array[index]);
-
-	if (GetRightChildIndex(index) < _length)
-		PreOrder(func, GetRightChildIndex(index));
-}
-
-template <class T>
-void Heap<T>::PostOrder(void(*func)(T), int index)
-{
-	if (GetLeftChildIndex(index) < _length)
-		PreOrder(func, GetLeftChildIndex(index));
-
-	if (GetRightChildIndex(index) < _length)
-		PreOrder(func, GetRightChildIndex(index));
-
-	if (index >= 0 && index < _length)
-		func(_array[index]);
-}
-
-template<class T>
-std::ostream& operator<<(std::ostream& stream,const Heap<T>& heap)
-{
-	for (int i = 0; i < heap._length; i++)
-		stream << heap._array[i] << ' ';
+	for (int i = 0; i < heap.m_iLength; i++)
+		stream << heap.m_pArray[i] << ' ';
 
 	return stream;
 }

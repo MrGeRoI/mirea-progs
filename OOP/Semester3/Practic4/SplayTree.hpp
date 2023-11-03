@@ -7,9 +7,6 @@ protected:
 
 	Node<K, V> *Splay(Node<K, V> *node);
 
-public:
-	SplayTree<K, V>() : Tree<K, V>() {}
-
 	virtual Node<K, V> *Find(bool (*find)(K, V)) const { return Tree<K, V>::Find(find, Tree<K, V>::_root); };
 
 	virtual Node<K, V> *Find(bool (*find)(K, V), Node<K, V> *current) const;
@@ -25,6 +22,9 @@ public:
 	virtual Node<K, V> *Push(Node<K, V> *node, Node<K, V> *current) override;
 
 	virtual Node<K, V> *Remove(Node<K, V> *node) override;
+
+public:
+	SplayTree<K, V>() : Tree<K, V>() {}
 
 	~SplayTree<K, V>(){};
 };

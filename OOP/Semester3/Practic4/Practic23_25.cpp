@@ -684,26 +684,36 @@ protected:
 
 	virtual Node<K, V> *Push(K key, V value, Node<K, V> *current);
 
-public:
-	virtual Node<K, V> *GetRoot() const { return _root; }
-
-	Tree<K, V>() { _root = nullptr; }
-
-	virtual Node<K, V> *Push(K key, V value) { Push(key, value, _root); }
-
 	virtual Node<K, V> *Remove(Node<K, V> *node);
 
 	virtual Node<K, V> *Minimum(Node<K, V> *current = nullptr) const;
 
 	virtual Node<K, V> *Maximum(Node<K, V> *current = nullptr) const;
 
-	virtual Node<K, V> *Find(K find) const { return Find(find, _root); }
-
 	virtual Node<K, V> *Find(K key, Node<K, V> *current) const;
 
 	virtual Node<K, V> *Find(bool (*find)(K, V)) const { return Find(find, _root); }
 
 	virtual Node<K, V> *Find(bool (*find)(K, V), Node<K, V> *current) const;
+
+public:
+	virtual Node<K, V> *GetRoot() const { return _root; }
+
+	Tree<K, V>() { _root = nullptr; }
+
+	virtual TreeIterator<K, V> Push(K key, V value) { TreeIterator<K, V>(this->Push(key, value, _root)); }
+
+	virtual void Remove(TreeIterator<K, V> it) { this->Remove(it.GetNode()) };
+
+	virtual TreeIterator<K, V> Minimum(TreeIterator<K, V> it) const { TreeIterator<K, V>(this->Minimum(it.GetNode())) };
+
+	virtual TreeIterator<K, V> Maximum(TreeIterator<K, V> it) const { TreeIterator<K, V>(this->Maximum(it.GetNode())) };
+
+	virtual TreeIterator<K, V> Find(K find) const { return TreeIterator<K, V>(this->Find(find, _root)); }
+
+	virtual TreeIterator<K, V> Find(bool (*find)(K, V)) const { return TreeIterator<K, V>(Find(this->find, _root)); }
+
+	virtual TreeIterator<K, V> Find(bool (*find)(K, V), TreeIterator<K, V> current) const{ return TreeIterator<K, V>(this->Find(find, current.GetNode())); }
 
 	virtual V operator[](K key) const { return Find(key)->GetValue(); }
 
@@ -1073,13 +1083,13 @@ int main()
 	for(TreeIterator<string, Student> it = tree.begin();it != tree.end(); it++)
 		cout << (*it).GetValue() << endl;
 
-	Student found = tree.Find("Malysh")->GetValue();
+	Student found = (*tree.Find("Malysh")).GetValue();
 
 	// Расширяющиеся дерево (элементы с одинаковыми ключами хранятся справа)
 	SplayTree<string, Student> stree;
 
 	tree.Push("KMBO001",Student("Yarik","Malysh","Zamkad",true,2004,5));
-	tree.Push("KMBO002",Student("Danya","Lykov","Branks",true,2007,8));
+	TreeIterator<string, Student> it = tree.Push("KMBO002",Student("Danya","Lykov","Branks",true,2007,8));
 	tree.Push("KMBO003",Student("Sanya","Lazarev","Moscow",true,2005,6));
 	tree.Push("KMBO004",Student("German","Zaycev","Krasnodar",true,2004,4));
 	tree.Push("KMBO005",Student("Senya","Lenin","Penza",true,2004,3));
@@ -1092,6 +1102,7 @@ int main()
 	tree.Find("KMBO001");
 	tree.Find("KMBO006");
 	tree.Find("KMBO002");
+	tree.Remove(it);
 	tree.Find("KMBO001");
 
 	// Теперь в корне и  его окрестности находятся значения, к которым чаще всего обращались

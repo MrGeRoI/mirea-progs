@@ -1,132 +1,160 @@
-#include <vector>
-#include <map>
 #include <stdexcept>
-#include <unordered_map>
 
 namespace
 {
-	template <typename T>
+	template <typename T = unsigned>
 	class dsu
 	{
 	protected:
-		struct node
-		{
-		public:
-			node *_parent;
-			int _rank,_size;
+		T *_parent;
+		int *_rank;
+		size_t *_size;
 
-			node(T val)
-			{
-				_parent = val;
-
-				_rank = 0;
-			}
-		};
-
-		node **_root;
-		size_t _count;
-
-		std::unordered_map<T, node> _dsu;
-
-		node *find_node(node *current)
-		{
-			if (current->_parent == current)
-				return current;
-
-			return find_node(current._parent);
-		}
+		const size_t _capacity;
 
 	public:
-		dsu(){};
+		dsu(size_t size);
 
-		void unite_sets(T major, T minor)
-		{
-			node &a = _dsu.at(major);
-			node &b = _dsu.at(minor);
-		
-			if (a._parent == b._parent)
-				return;
+		T root(T x);
 
-			if (a._rank < b._rank)
-				std::swap(a, b);
+		T root(T x) const;
 
-			b._parent = major;
+		size_t size(T x);
 
-			if (a._rank == b._rank)
-				a._rank++;
-		}
+		size_t size(T x) const;
 
-		void make_set(T value)
-		{
-			_dsu[value]._parent = value;
-		}
+		void unite(T x, T y);
 
-		T find_set(T value)
-		{
-			node &data = _dsu.at(value);
+		bool equal(T x, T y);
 
-			if (value == data._parent)
-				return value;
+		bool equal(T x, T y) const;
 
-			return data._parent = find_set(data._parent);
-		}
+		T operator[](T x);
 
-		T find_set(T value) const
-		{
-			node &data = _dsu.at(value);
+		T operator[](T x) const;
 
-			if (value == data._parent)
-				return value;
-
-			return find_set(data._parent);
-		}
-
-		T &operator[](T value);
-
-		T &at(T value);
-		const T &at(T value) const;
+		~dsu();
 	};
 
-	// find_set/make_set
 	template <typename T>
-	T &dsu<T>::operator[](T value)
+	dsu<T>::dsu(size_t capacity) : _capacity(capacity)
 	{
-		node &data = _dsu[value];
+		_parent = new T[capacity];
+		_rank = new int[capacity];
+		_size = new size_t[capacity];
 
-		if (value == data._parent)
-			return data._parent;
-
-		return operator[](data._parent);
+		for (T i = 0; i < capacity; i++)
+		{
+			_parent[i] = i; // Родитель
+			_rank[i] = 0;	// Ранг
+			_size[i] = 1;	// Размер
+		}
 	}
 
 	template <typename T>
-	T &dsu<T>::at(T value)
+	T dsu<T>::root(T x)
 	{
-		try
-		{
-			return _dsu.at(value);
-		}
-		catch (const std::out_of_range &out)
-		{
-			throw out;
-		}
+		if (x < 0 || x >= _capacity)
+			throw std::out_of_range("");
 
-		throw std::invalid_argument("T &dsu<T>::at(T value)");
+		T p = _parent[x];
+
+		if (x == p)
+			return x;
+
+		return (_parent[x] = root(p));
 	}
 
 	template <typename T>
-	const T &dsu<T>::at(T value) const
+	T dsu<T>::root(T x) const
 	{
-		try
-		{
-			return _dsu.at(value);
-		}
-		catch (const std::out_of_range &out)
-		{
-			throw out;
-		}
+		if (x < 0 || x >= _capacity)
+			throw std::out_of_range("");
 
-		throw std::invalid_argument("T &dsu<T>::at(T value)");
+		T p = _parent[x];
+
+		if (x == p)
+			return x;
+
+		return root(p);
 	}
 
+	template <typename T>
+	size_t dsu<T>::size(T x)
+	{
+		if (x < 0 || x >= _capacity)
+			throw std::out_of_range("");
+
+		return _size[root(x)];
+	}
+
+	template <typename T>
+	size_t dsu<T>::size(T x) const
+	{
+		if (x < 0 || x >= _capacity)
+			throw std::out_of_range("");
+
+		return _size[root(x)];
+	}
+
+	template <typename T>
+	void dsu<T>::unite(T x, T y)
+	{
+		if (x < 0 || x >= _capacity || y < 0 || y >= _capacity)
+			throw std::out_of_range("");
+
+		x = root(x);
+		y = root(y);
+
+		if (x == y)
+			return;
+
+		if (_rank[x] < _rank[y])
+			std::swap(x, y);
+
+		_size[x] += _size[y];
+
+		_parent[y] = x;
+
+		if (_rank[x] == _rank[y])
+			_rank[x]++;
+	}
+
+	template <typename T>
+	bool dsu<T>::equal(T x, T y)
+	{
+		if (x < 0 || x >= _capacity || y < 0 || y >= _capacity)
+			throw std::out_of_range("");
+
+		return root(x) == root(y);
+	}
+
+	template <typename T>
+	bool dsu<T>::equal(T x, T y) const
+	{
+		if (x < 0 || x >= _capacity || y < 0 || y >= _capacity)
+			throw std::out_of_range("");
+
+		return root(x) == root(y);
+	}
+
+	template <typename T>
+	T dsu<T>::operator[](T x)
+	{
+		return root(x);
+	}
+
+	template <typename T>
+	T dsu<T>::operator[](T x) const
+	{
+		return root(x);
+	}
+
+	template <typename T>
+	dsu<T>::~dsu()
+	{
+		delete[] _parent;
+		delete[] _rank;
+		delete[] _size;
+	}
 }

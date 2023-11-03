@@ -1,14 +1,16 @@
 #include <iostream>
 
-#include "dsu2.hpp"
+#include "dsu.hpp"
 
 using namespace std;
 
 int main(int argc, char *argv[])
 {
-	untitled::dsu<int> some;
+	dsu some(100);
 
-	some[3] = 2;
+	some.unite(2,3);
+
+	some.equal(2,3);
 
 	return 0;
 }
