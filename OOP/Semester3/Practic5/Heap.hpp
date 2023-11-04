@@ -48,9 +48,9 @@ public:
 		m_iSize = memory;
 	}
 
-	void Push(T N);
+	void push(T N);
 
-	void Remove(int index);
+	void remove(int index);
 
 	T extractMin();
 
@@ -158,7 +158,7 @@ void Heap<T>::siftDown(int index)
 }
 
 template <class T>
-void Heap<T>::Push(T N)
+void Heap<T>::push(T N)
 {
 
 	if (m_iLength < m_iSize)
@@ -170,7 +170,7 @@ void Heap<T>::Push(T N)
 }
 
 template <class T>
-void Heap<T>::Remove(int index)
+void Heap<T>::remove(int index)
 {
 	if (index < 0 || index >= m_iLength)
 		throw std::out_of_range;

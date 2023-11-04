@@ -1,46 +1,27 @@
 ﻿#define HEAP_MAX_TREES 64
 
+#include <list>
+
 template <class T>
 class FibonacciHeap;
 
 template <class T>
-struct HeapNode
+struct FibNode
 {
 public:
-	HeapNode<T> *m_pPrevious, *m_pNext, *m_pChild, *m_pParent;
+	FibNode<T> *m_pPrevious, *m_pNext, *m_pChild, *m_pParent;
 
 	T m_priority;
 	int m_iDegree;
 	bool m_bMarked;
 };
-/*
-template <class T>
-class HeapNode
-{
-private:
-	HeapNode<T> *m_pPrevious, *m_pNext, , *m_pChild, *m_pParent;
 
-	T m_priority;
-	int m_iDegree;
-	bool m_bMarked;
-public:
-	friend class FibonacciHeap<T>;
-
-	HeapNode<T> *getPrev() { return m_pPrevious; }
-	HeapNode<T> *getNext() { return m_pNext; }
-	HeapNode<T> *getChild() { return m_pChild; }
-	HeapNode<T> *getParent() { return m_pParent; }
-
-	T getPriority() { return m_priority; }
-
-	bool isMarked() { return m_bMarked; }
-};
-*/
 template <class T>
 class FibonacciHeap
 {
 protected:
-	HeapNode<T> *m_pRoot;
+	std::list<FibNode<T> *> m_Roots;
+	typename std::list<FibNode<T> *>::iterator m_itRoot;
 
 public:
 	FibonacciHeap();
@@ -58,15 +39,15 @@ public:
 	virtual T extractMaximum();
 
 private:
-	void delete_(HeapNode<T> *node);
+	void delete_(FibNode<T> *node);
 
-	void addChild(HeapNode<T> *parent, HeapNode<T> *child);
+	void addChild(FibNode<T> *parent, FibNode<T> *child);
 
-	void unMarkAndUnParentAll(HeapNode<T> *node);
+	void unMarkAndUnParentAll(FibNode<T> *node);
 
-	HeapNode<T> *merge(HeapNode<T> *a, HeapNode<T> *b);
+	FibNode<T> * merge(FibNode<T> *a, FibNode<T> *b);
 
-	HeapNode<T> *removeMaximum(HeapNode<T> *node);
+	FibNode<T> *removeMaximum(FibNode<T> *node);
 };
 
 template <class T>
@@ -75,14 +56,14 @@ FibonacciHeap<T>::FibonacciHeap() : m_pRoot(nullptr) {}
 template <class T>
 FibonacciHeap<T>::~FibonacciHeap()
 {
-	if (m_pRoot)
-		delete_(m_pRoot);
+	for (typename list<FibNode<T> *>::iterator it = m_Roots.begin(); it != m_Roots.end(); ++it)
+		delete *it;
 }
 
 template <class T>
 void FibonacciHeap<T>::push(T priority)
 {
-	HeapNode<T> *node = new HeapNode<T>;
+	FibNode<T> *node = new FibNode<T>;
 	node->m_priority = priority;
 	node->m_pPrevious = node->m_pNext = node;
 	node->m_iDegree = 0;
@@ -90,20 +71,20 @@ void FibonacciHeap<T>::push(T priority)
 	node->m_pChild = nullptr;
 	node->m_pParent = nullptr;
 
-	m_pRoot = merge(m_pRoot, node);
+	m_itRoot = (priority > (*m_itRoot)->m_priority) : m_Roots.insert(m_itRoot,node) ? m_itRoot;
 }
 
 template <class T>
 void FibonacciHeap<T>::merge(FibonacciHeap &other)
 {
-	m_pRoot = merge(m_pRoot, other.m_pRoot);
-	other.m_pRoot = nullptr;
+	m_itRoot = merge(m_itRoot, other.m_pRoot);
+	other.m_itRoot = other.m_Roots.end();
 }
 
 template <class T>
 bool FibonacciHeap<T>::isEmpty() const
 {
-	return m_pRoot == nullptr;
+	return m_Roots.empty();
 }
 
 template <class T>
@@ -115,7 +96,7 @@ T FibonacciHeap<T>::maximum() const
 template <class T>
 T FibonacciHeap<T>::extractMaximum()
 {
-	HeapNode<T> *old = m_pRoot;
+	FibNode<T> *old = m_pRoot;
 	m_pRoot = removeMaximum(m_pRoot);
 	T ret = old->m_priority;
 	delete old;
@@ -123,7 +104,7 @@ T FibonacciHeap<T>::extractMaximum()
 }
 
 template <class T>
-HeapNode<T> *FibonacciHeap<T>::merge(HeapNode<T> *a, HeapNode<T> *b)
+FibNode<T> *FibonacciHeap<T>::merge(FibNode<T> *a, FibNode<T> *b)
 {
 	if (a == nullptr)
 		return b;
@@ -132,13 +113,13 @@ HeapNode<T> *FibonacciHeap<T>::merge(HeapNode<T> *a, HeapNode<T> *b)
 	// делаем a бОльшим из двух
 	if (a->m_priority < b->m_priority)
 	{
-		HeapNode<T> *temp = a;
+		FibNode<T> *temp = a;
 		a = b;
 		b = temp;
 	}
 
-	HeapNode<T> *an = a->m_pNext;
-	HeapNode<T> *bp = b->m_pPrevious;
+	FibNode<T> *an = a->m_pNext;
+	FibNode<T> *bp = b->m_pPrevious;
 
 	a->m_pNext = b;
 	b->m_pPrevious = a;
@@ -150,15 +131,15 @@ HeapNode<T> *FibonacciHeap<T>::merge(HeapNode<T> *a, HeapNode<T> *b)
 }
 
 template <class T>
-void FibonacciHeap<T>::delete_(HeapNode<T> *node)
+void FibonacciHeap<T>::delete_(FibNode<T> *node)
 {
 	if (node != nullptr)
 	{
-		HeapNode<T> *c = node;
+		FibNode<T> *c = node;
 
 		do
 		{
-			HeapNode<T> *d = c;
+			FibNode<T> *d = c;
 
 			c = c->m_pNext;
 
@@ -170,9 +151,9 @@ void FibonacciHeap<T>::delete_(HeapNode<T> *node)
 }
 
 template <class T>
-void FibonacciHeap<T>::addChild(HeapNode<T> *parent, HeapNode<T> *child)
+void FibonacciHeap<T>::addChild(FibNode<T> *parent, FibNode<T> *child)
 {
-	HeapNode<T> *oldChild = parent->m_pChild;
+	FibNode<T> *oldChild = parent->m_pChild;
 
 	if (oldChild == nullptr)
 	{
@@ -182,7 +163,7 @@ void FibonacciHeap<T>::addChild(HeapNode<T> *parent, HeapNode<T> *child)
 		return;
 	}
 
-	HeapNode<T> *next = oldChild->m_pNext;
+	FibNode<T> *next = oldChild->m_pNext;
 
 	if (next)
 	{
@@ -195,12 +176,12 @@ void FibonacciHeap<T>::addChild(HeapNode<T> *parent, HeapNode<T> *child)
 }
 
 template <class T>
-void FibonacciHeap<T>::unMarkAndUnParentAll(HeapNode<T> *node)
+void FibonacciHeap<T>::unMarkAndUnParentAll(FibNode<T> *node)
 {
 	if (node == nullptr)
 		return;
 
-	HeapNode<T> *c = node;
+	FibNode<T> *c = node;
 
 	do
 	{
@@ -211,7 +192,7 @@ void FibonacciHeap<T>::unMarkAndUnParentAll(HeapNode<T> *node)
 }
 
 template <class T>
-HeapNode<T> *FibonacciHeap<T>::removeMaximum(HeapNode<T> *node)
+FibNode<T> *FibonacciHeap<T>::removeMaximum(FibNode<T> *node)
 {
 	if (node == nullptr)
 		return node;
@@ -224,27 +205,27 @@ HeapNode<T> *FibonacciHeap<T>::removeMaximum(HeapNode<T> *node)
 	else
 	{
 		// много узлов, удалить максимум из списка и объединить node->m_pNext, node->m_pChild (левый ребенок поднялся вверх)
-		HeapNode<T> *child = node->m_pChild,
-					*childPrev = child->m_pPrevious;
+		FibNode<T> *child = node->m_pChild,
+				   *childPrev = child->m_pPrevious;
 
-		if(childPrev)
+		if (childPrev)
 		{
-			merge(childPrev,childNext);
+			merge(childPrev, childNext);
 			addChild(childPrev);
 		}
 
-		merge(node->m_pNext,child);
+		merge(node->m_pNext, child);
 	}
 
 	// Консолидация
 
-	HeapNode<T> *trees[HEAP_MAX_TREES] = {nullptr};
+	FibNode<T> *trees[HEAP_MAX_TREES] = {nullptr};
 
 	while (true)
 	{
 		if (trees[node->m_iDegree] != nullptr)
 		{
-			HeapNode<T> *t = trees[node->m_iDegree];
+			FibNode<T> *t = trees[node->m_iDegree];
 			if (t == node)
 				break;
 			trees[node->m_iDegree] = nullptr;
