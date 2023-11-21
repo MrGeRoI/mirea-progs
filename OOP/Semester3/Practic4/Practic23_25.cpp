@@ -956,6 +956,13 @@ protected:
 
 	Node<K, V> *Splay(Node<K, V> *node);
 
+	virtual Node<K, V> *Find(K key, Node<K, V> *current) const override;
+
+	virtual Node<K, V> *Push(Node<K, V> *node) override { return Tree<K, V>::Push(node); };
+
+	virtual Node<K, V> *Push(Node<K, V> *node, Node<K, V> *current) override;
+
+	virtual Node<K, V> *Remove(Node<K, V> *node) override;
 public:
 	SplayTree<K, V>() : Tree<K, V>() {}
 
@@ -965,15 +972,7 @@ public:
 
 	virtual Node<K, V> *Find(K key) const override { return Tree<K, V>::Find(key, Tree<K, V>::_root); };
 
-	virtual Node<K, V> *Find(K key, Node<K, V> *current) const override;
-
 	virtual Node<K, V> *Push(K key, V value) override { return Tree<K, V>::Push(key, value); };
-
-	virtual Node<K, V> *Push(Node<K, V> *node) override { return Tree<K, V>::Push(node); };
-
-	virtual Node<K, V> *Push(Node<K, V> *node, Node<K, V> *current) override;
-
-	virtual Node<K, V> *Remove(Node<K, V> *node) override;
 
 	~SplayTree<K, V>(){};
 };

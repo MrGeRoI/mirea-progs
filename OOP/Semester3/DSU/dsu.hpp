@@ -1,160 +1,208 @@
 #include <stdexcept>
+#include <vector>
 
 namespace
 {
-	template <typename T = unsigned>
 	class dsu
 	{
 	protected:
-		T *_parent;
-		int *_rank;
-		size_t *_size;
-
-		const size_t _capacity;
+		std::vector<int> m_rank,	 // Ранги вершин
+			m_parent;				 // Родители вершин
+		std::vector<size_t> m_count; // Мощность множества
 
 	public:
-		dsu(size_t size);
+		dsu(size_t size = 0);
 
-		T root(T x);
+		dsu(const dsu &other);
 
-		T root(T x) const;
+		int leader(int x);
 
-		size_t size(T x);
+		int leader(int x) const;
 
-		size_t size(T x) const;
+		size_t count(int x);
 
-		void unite(T x, T y);
+		size_t count(int x) const;
 
-		bool equal(T x, T y);
+		inline size_t size() const;
 
-		bool equal(T x, T y) const;
+		void resize(size_t size);
 
-		T operator[](T x);
+		int unite(int x, int y);
 
-		T operator[](T x) const;
+		bool equal(int x, int y);
+
+		bool equal(int x, int y) const;
+
+		void clear();
+
+		int operator[](int x);
+
+		int operator[](int x) const;
+
+		dsu &operator=(const dsu &other);
 
 		~dsu();
 	};
 
-	template <typename T>
-	dsu<T>::dsu(size_t capacity) : _capacity(capacity)
+	dsu::dsu(size_t size) : m_parent(size),
+							m_rank(size),
+							m_count(size)
 	{
-		_parent = new T[capacity];
-		_rank = new int[capacity];
-		_size = new size_t[capacity];
-
-		for (T i = 0; i < capacity; i++)
+		for (int i = 0; i < size; i++)
 		{
-			_parent[i] = i; // Родитель
-			_rank[i] = 0;	// Ранг
-			_size[i] = 1;	// Размер
+			m_parent[i] = i;
+			m_rank[i] = 0;
+			m_count[i] = 1;
 		}
 	}
 
-	template <typename T>
-	T dsu<T>::root(T x)
+	dsu::dsu(const dsu &other) : m_parent(other.m_parent.size()),
+								 m_rank(other.m_parent.size()),
+								 m_count(other.m_parent.size())
 	{
-		if (x < 0 || x >= _capacity)
+		for (int i = 0; i < m_parent.size(); i++)
+		{
+			m_parent[i] = other.m_parent[i];
+			m_rank[i] = other.m_rank[i];
+			m_count[i] = other.m_count[i];
+		}
+	}
+
+	int dsu::leader(int x)
+	{
+		if (x < 0 || x >= m_parent.size())
 			throw std::out_of_range("");
 
-		T p = _parent[x];
+		int p = m_parent[x];
 
 		if (x == p)
 			return x;
 
-		return (_parent[x] = root(p));
+		return (m_parent[x] = leader(p));
 	}
 
-	template <typename T>
-	T dsu<T>::root(T x) const
+	int dsu::leader(int x) const
 	{
-		if (x < 0 || x >= _capacity)
+		if (x < 0 || x >= m_parent.size())
 			throw std::out_of_range("");
 
-		T p = _parent[x];
+		int p = m_parent[x];
 
 		if (x == p)
 			return x;
 
-		return root(p);
+		return leader(p);
 	}
 
-	template <typename T>
-	size_t dsu<T>::size(T x)
+	size_t dsu::count(int x)
 	{
-		if (x < 0 || x >= _capacity)
+		if (x < 0 || x >= m_parent.size())
 			throw std::out_of_range("");
 
-		return _size[root(x)];
+		return m_count[leader(x)];
 	}
 
-	template <typename T>
-	size_t dsu<T>::size(T x) const
+	size_t dsu::count(int x) const
 	{
-		if (x < 0 || x >= _capacity)
+		if (x < 0 || x >= m_parent.size())
 			throw std::out_of_range("");
 
-		return _size[root(x)];
+		return m_count[leader(x)];
 	}
 
-	template <typename T>
-	void dsu<T>::unite(T x, T y)
+	size_t dsu::size() const
 	{
-		if (x < 0 || x >= _capacity || y < 0 || y >= _capacity)
+		return m_parent.size();
+	}
+
+	void dsu::resize(size_t size)
+	{
+		if (m_parent.size() != size)
+		{
+			m_parent.resize(size);
+			m_rank.resize(size);
+			m_count.resize(size);
+		}
+	}
+
+	int dsu::unite(int x, int y)
+	{
+		if (x < 0 || x >= m_parent.size() || y < 0 || y >= m_parent.size())
 			throw std::out_of_range("");
 
-		x = root(x);
-		y = root(y);
+		x = leader(x);
+		y = leader(y);
 
 		if (x == y)
-			return;
+			return x;
 
-		if (_rank[x] < _rank[y])
+		if (m_rank[x] < m_rank[y])
 			std::swap(x, y);
 
-		_size[x] += _size[y];
+		m_count[x] += m_count[y];
 
-		_parent[y] = x;
+		m_parent[y] = x;
 
-		if (_rank[x] == _rank[y])
-			_rank[x]++;
+		if (m_rank[x] == m_rank[y])
+			m_rank[x]++;
+
+		return x;
 	}
 
-	template <typename T>
-	bool dsu<T>::equal(T x, T y)
+	bool dsu::equal(int x, int y)
 	{
-		if (x < 0 || x >= _capacity || y < 0 || y >= _capacity)
+		if (x < 0 || x >= m_parent.size() || y < 0 || y >= m_parent.size())
 			throw std::out_of_range("");
 
-		return root(x) == root(y);
+		return leader(x) == leader(y);
 	}
 
-	template <typename T>
-	bool dsu<T>::equal(T x, T y) const
+	bool dsu::equal(int x, int y) const
 	{
-		if (x < 0 || x >= _capacity || y < 0 || y >= _capacity)
+		if (x < 0 || x >= m_parent.size() || y < 0 || y >= m_parent.size())
 			throw std::out_of_range("");
 
-		return root(x) == root(y);
+		return leader(x) == leader(y);
 	}
 
-	template <typename T>
-	T dsu<T>::operator[](T x)
+	void dsu::clear()
 	{
-		return root(x);
+		m_parent.clear();
+		m_rank.clear();
+		m_count.clear();
 	}
 
-	template <typename T>
-	T dsu<T>::operator[](T x) const
+	int dsu::operator[](int x)
 	{
-		return root(x);
+		return leader(x);
 	}
 
-	template <typename T>
-	dsu<T>::~dsu()
+	int dsu::operator[](int x) const
 	{
-		delete[] _parent;
-		delete[] _rank;
-		delete[] _size;
+		return leader(x);
 	}
+
+	dsu &dsu::operator=(const dsu &other)
+	{
+		size_t other_size = other.m_parent.size();
+
+		if (m_parent.size() != other_size)
+		{
+			m_parent.resize(other_size);
+			m_rank.resize(other_size);
+			m_count.resize(other_size);
+		}
+
+		for (int i = 0; i < other_size; i++)
+		{
+			m_parent[i] = other.m_parent[i];
+			m_rank[i] = other.m_rank[i];
+			m_count[i] = other.m_count[i];
+		}
+
+		return *this;
+	}
+
+	dsu::~dsu() {}
+
 }

@@ -15,14 +15,14 @@ protected:
 public:
 	//доступные извне переменные и функции
 	virtual void SetData(T d) { _data = d; }
-	virtual T GetData() { return _data; }
+	virtual T GetData() const { return _data; }
 
-	virtual int GetHeight() { return _height; }
+	virtual int GetHeight() const { return _height; }
 	virtual void SetHeight(int h) { _height = h; }
 
-	virtual Node<T>* GetLeft() { return _left; }
-	virtual Node<T>* GetRight() { return _right; }
-	virtual Node<T>* GetParent() { return _parent; }
+	virtual Node<T>* GetLeft() const { return _left; }
+	virtual Node<T>* GetRight() const { return _right; }
+	virtual Node<T>* GetParent() const { return _parent; }
 
 	virtual void SetLeft(Node<T>* node) { _left = node; }
 	virtual void SetRight(Node<T>* node) { _right = node; }
@@ -44,13 +44,13 @@ public:
 	}
 
     // переход к следующему элементу
-	virtual Node<T>* Successor();
+	virtual Node<T>* Successor() const;
 
     // переход к предыдущему элементу
-	virtual Node<T>* Predecessor();
+	virtual Node<T>* Predecessor() const;
 
-	virtual Node<T>* Minimum();
-	virtual Node<T>* Maximum();
+	virtual Node<T>* Minimum() const;
+	virtual Node<T>* Maximum() const;
 
     //  Создайте интерфейс для этих функций на основе перегрузки операций ++ и --.
     virtual Node<T>* operator++() { return Successor(); }

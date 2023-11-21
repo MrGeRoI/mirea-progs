@@ -72,8 +72,10 @@ set<V> unique(const map<K,V>& source)
 {
 	set<V> result;
 	
-	for(pair<K,V> item : source)
-		result.insert(item.second);
+	//for(pair<K,V> item : source)
+	//	result.insert(item.second);
+	for(typename map<K,V>::iterator it = source.begin();it != source.end();it++)
+		result.insert(it->second);
 
 	return result;
 }
