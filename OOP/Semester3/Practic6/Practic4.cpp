@@ -510,15 +510,11 @@ int main()
 	std::cout << "Original Treap:\n"
 			  << treap << std::endl;
 
-	// Задаем отрезок [2, 5]
-	int start = 2;
-	int end = 5;
-
 	// Находим минимальный элемент на заданном отрезке
-	ImplictTreap::Iterator minElement = treap.getMinimumOnSegment(start, end);
+	ImplictTreap::Iterator minElement = treap.getMinimumOnSegment(2, 5);
 
-	// Выводим результат
-	std::cout << "Minimum element in the range [" << start << ", " << end << "]: " << *minElement << std::endl;
+	// Выводим результат: 8
+	std::cout << "Minimum at [2;5]: " << *minElement << std::endl;
 
 	return 0;
 }

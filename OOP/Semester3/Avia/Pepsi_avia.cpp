@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <queue>
+#include <list>
 
 using namespace std;
 
@@ -52,7 +53,7 @@ public:
 
 	Aviacompany(vector<vector<Flight>> flights) : matrix(flights) {}
 
-	vector<int> getBestPath(int start, int to)
+	list<int> getBestPath(int start, int to)
 	{
 		int n = matrix.size();
 
@@ -93,7 +94,7 @@ public:
 		}
 
 		// Восстановление пути
-		vector<int> path;
+		list<int> path;
 		for (int v = to; v != -1; v = prev[v])
 			path.push_back(v);
 
