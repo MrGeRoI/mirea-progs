@@ -25,6 +25,8 @@ namespace
 
 		void scan();
 
+		int find(int x, int y);
+
 		int find(int x, int y) const;
 
 		void resize(size_t size);
@@ -62,32 +64,11 @@ namespace
 	}
 
 	lca::lca(const lca &other) : m_class(other.m_class),
-								 m_ancestor(other.m_ancestor.size()),
+								 m_ancestor(other.m_ancestor),
 								 m_component(other.m_component),
-								 m_visited(other.m_visited.size()),
-								 m_graph(other.m_graph.size()),
-								 m_lca(other.m_lca.size())
-	{
-		size_t size = other.m_class.size();
-
-		for (int i = 0; i < size; i++)
-		{
-			m_ancestor[i] = other.m_ancestor[i];
-			m_visited[i] = other.m_visited[i];
-
-			for (int j = 0; i < size; i++)
-			{
-				m_graph[i * size + j] = other.m_graph[i * size + j];
-				m_graph[j * size + i] = other.m_graph[j * size + i];
-
-				m_lca[i * size + j] = other.m_lca[i * size + j];
-				m_lca[j * size + i] = other.m_lca[j * size + i];
-			}
-		}
-
-		m_class = other.m_class;
-		m_component = other.m_component;
-	}
+								 m_visited(other.m_visited),
+								 m_graph(other.m_graph),
+								 m_lca(other.m_lca) {}
 
 	void lca::joint(int x, int y)
 	{
@@ -140,6 +121,22 @@ namespace
 				m_lca[x * m_class.size() + y] = m_lca[y * m_class.size() + x] = m_ancestor[m_class.leader(y)];
 	}
 
+	int lca::find(int x, int y)
+	{
+		if (x < 0 || x >= m_class.size() || y < 0 || y >= m_class.size())
+			throw std::out_of_range("");
+
+		if (m_visited[x] != m_visited[y])
+			return -1;
+
+		if (!m_visited[x])
+			dfs(x);
+		else if (!m_visited[y])
+			dfs(y);
+
+		return m_lca[x * m_class.size() + y];
+	}
+
 	int lca::find(int x, int y) const
 	{
 		if (x < 0 || x >= m_class.size() || y < 0 || y >= m_class.size())
@@ -178,33 +175,14 @@ namespace
 
 	lca &lca::operator=(const lca &other)
 	{
-		size_t other_size = other.m_class.size();
-
-		if (m_class.size() != other_size)
-		{
-			m_ancestor.resize(other_size);
-			m_visited.resize(other_size);
-			m_graph.resize(other_size * other_size);
-			m_lca.resize(other_size * other_size);
-		}
-
-		for (int i = 0; i < other_size; i++)
-		{
-			m_ancestor[i] = other.m_ancestor[i];
-			m_visited[i] = other.m_visited[i];
-
-			for (int j = 0; i < other_size; i++)
-			{
-				m_graph[i * other_size + j] = other.m_graph[i * other_size + j];
-				m_graph[j * other_size + i] = other.m_graph[j * other_size + i];
-
-				m_lca[i * other_size + j] = other.m_lca[i * other_size + j];
-				m_lca[j * other_size + i] = other.m_lca[j * other_size + i];
-			}
-		}
-
 		m_class = other.m_class;
 		m_component = other.m_component;
+		m_ancestor = other.m_ancestor;
+		m_visited = other.m_visited;
+		m_graph = other.m_graph;
+		m_lca = other.m_lca;
+
+		return *this;
 	}
 
 	lca::~lca() {}

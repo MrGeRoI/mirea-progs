@@ -5,7 +5,7 @@
 namespace
 {
 	template <typename T>
-	class mapped_dsu : public dsu
+	class mapped_dsu : protected dsu
 	{
 	private:
 		std::unordered_map<T, int> m_index;
@@ -153,13 +153,8 @@ namespace
 	{
 		dsu::operator=(other);
 
-		size_t other_size = other.m_parent.size();
-
-		for (int i = 0; i < other_size; i++)
-		{
-			m_value[i] = other.m_value[i];
-			m_index[i] = other.m_index[i];
-		}
+		m_value = other.m_value;
+		m_index = other.m_index;
 
 		return *this;
 	}

@@ -56,17 +56,9 @@ namespace
 		}
 	}
 
-	dsu::dsu(const dsu &other) : m_parent(other.m_parent.size()),
-								 m_rank(other.m_parent.size()),
-								 m_count(other.m_parent.size())
-	{
-		for (int i = 0; i < m_parent.size(); i++)
-		{
-			m_parent[i] = other.m_parent[i];
-			m_rank[i] = other.m_rank[i];
-			m_count[i] = other.m_count[i];
-		}
-	}
+	dsu::dsu(const dsu &other) : m_parent(other.m_parent),
+								 m_rank(other.m_parent),
+								 m_count(other.m_count) {}
 
 	int dsu::leader(int x)
 	{
@@ -184,21 +176,9 @@ namespace
 
 	dsu &dsu::operator=(const dsu &other)
 	{
-		size_t other_size = other.m_parent.size();
-
-		if (m_parent.size() != other_size)
-		{
-			m_parent.resize(other_size);
-			m_rank.resize(other_size);
-			m_count.resize(other_size);
-		}
-
-		for (int i = 0; i < other_size; i++)
-		{
-			m_parent[i] = other.m_parent[i];
-			m_rank[i] = other.m_rank[i];
-			m_count[i] = other.m_count[i];
-		}
+		m_parent = other.m_parent;
+		m_rank = other.m_rank;
+		m_count = other.m_count;
 
 		return *this;
 	}
