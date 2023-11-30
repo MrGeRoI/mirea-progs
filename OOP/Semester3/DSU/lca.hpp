@@ -1,11 +1,14 @@
-#include "dsu.hpp"
+#pragma once
+
+#include "unordered_dsu.hpp"
 
 namespace
 {
+	// Дерево поиска наименьшего общего предка 
 	class lca
 	{
 	private:
-		dsu m_class,			   // Класс вершин предка
+		unordered_dsu m_class,	   // Класс вершин предка
 			m_component;		   // Компоненты связности графа
 		std::vector<bool> m_graph, // Матрица смежности
 			m_visited;			   // Марки посещённых вершин в BFS

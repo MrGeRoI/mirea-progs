@@ -1,44 +1,41 @@
+#pragma once
+
 #include "dsu.hpp"
 
 namespace
 {
+	// Система участков массива (подотрезков)
 	template <typename T>
 	class sub
 	{
 	private:
-		std::vector<T> m_value;
-		std::vector<int> m_parent;
-
-		int edge(int x)
-		{
-			int p = m_parent[x];
-
-			if (p >= m_parent.size())
-				return p;
-
-			if (x == p)
-				return x;
-
-			return (m_parent[x] = edge(p));
-		}
+		dsu m_end;				// Содержит в себе границу каждого заполненного участка (закрашенного подотрезка). Каждый подотрезок это подмножество в dsu
+		std::vector<T> m_value; // Значения массива
 
 	public:
+		// Создаёт массив указаной длины
 		sub(size_t size);
 
 		sub(const sub<T> &other);
 
+		// Заполнить участов [x;y) значением value
+		// x - включается в участок, а y - нет.
 		void fill(int x, int y, const T &value);
 
+		// Получить значение в позиции x
 		const T &find(int x) const;
 
+		// Весь массив
 		const std::vector<T> &values() const;
 
+		// Длина массива
 		size_t size() const;
 
 		void resize(size_t size);
 
 		void clear();
-
+		
+		// Эквивалент для find() только через оператор
 		const T &operator[](int x) const;
 
 		sub &operator=(const sub<T> &other);
@@ -47,41 +44,34 @@ namespace
 	};
 
 	template <typename T>
-	sub<T>::sub(size_t size) : m_value(size), m_parent(size)
-	{
-		for (int i = 0; i < size; i++)
-			m_parent[i] = i;
-	}
+	sub<T>::sub(size_t size) : m_end(size + 1),
+							   m_value(size) {}
 
 	template <typename T>
-	sub<T>::sub(const sub<T> &other) : m_value(other.m_value),
-									   m_parent(other.m_parent) {}
+	sub<T>::sub(const sub<T> &other) : m_end(other.m_end),
+									   m_value(other.m_value) {}
 
 	template <typename T>
 	void sub<T>::fill(int x, int y, const T &value)
 	{
-		if (x < 0 || x >= m_parent.size() || y < 0 || y > m_parent.size())
+		if (x < 0 || x >= m_end.size() || y < 0 || y > m_end.size())
 			throw std::out_of_range("");
 
 		if (x >= y)
 			return;
 
-		for (int i = x; i < y; i++)
+		for (int i = x; i < y; i = m_end.find(i))
 		{
-			i = edge(i);
-
-			if (i >= y)
-				break;
-
 			m_value[i] = value;
-			m_parent[i] = i + 1;
+
+			m_end.follow(i, i + 1);
 		}
 	}
 
 	template <typename T>
 	const T &sub<T>::find(int x) const
 	{
-		if (x < 0 || x >= m_parent.size())
+		if (x < 0 || x >= m_end.size())
 			throw std::out_of_range("");
 
 		return m_value[x];
@@ -91,14 +81,14 @@ namespace
 	const std::vector<T> &sub<T>::values() const { return m_value; }
 
 	template <typename T>
-	size_t sub<T>::size() const { return m_parent.size(); }
+	size_t sub<T>::size() const { return m_end.size() - 1; }
 
 	template <typename T>
 	void sub<T>::resize(size_t size)
 	{
-		if (m_parent.size() != size)
+		if ((m_end.size() - 1) != size)
 		{
-			m_parent.resize(size);
+			m_end.resize(size + 1);
 			m_value.resize(size);
 		}
 	}
@@ -106,7 +96,7 @@ namespace
 	template <typename T>
 	void sub<T>::clear()
 	{
-		m_parent.clear();
+		m_end.clear();
 		m_value.clear();
 	}
 
@@ -119,7 +109,7 @@ namespace
 	template <typename T>
 	sub<T> &sub<T>::operator=(const sub<T> &other)
 	{
-		m_parent = other.m_parent;
+		m_end = other.m_end;
 		m_value = other.m_value;
 	}
 

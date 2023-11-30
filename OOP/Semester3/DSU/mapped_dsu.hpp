@@ -1,45 +1,59 @@
+#pragma once
+
 #include <unordered_map>
 
 #include "dsu.hpp"
 
 namespace
 {
+	// Обобщённая система непересекающихся множеств на хэш-таблице
 	template <typename T>
 	class mapped_dsu : protected dsu
 	{
 	private:
-		std::unordered_map<T, int> m_index;
-		std::vector<T> m_value;
+		std::unordered_map<T, int> m_index; // Индексы элементов, соответсвующих данным элементов
+		std::vector<T> m_value;				// Данные элементов, соответвующие их индексам в dsu
 
 	public:
+		// В конструкторе не нужен размер, он будет увеличиваться по мере добавления элементов
 		mapped_dsu();
 
 		mapped_dsu(const mapped_dsu &other);
 
+		// Создаёт множество {x} из элемента x
+		// Сохраняет новый индекс в хэш-таблицу по значению x с произвольным типом
+		// Записывает значение x по полученному индексу
 		void make_set(T x);
 
-		T leader(T x);
+		// Поиск лидера по значению
+		T find(T x);
 
-		T leader(T x) const;
+		// То же без сжатия пути
+		T find(T x) const;
 
-		size_t count(T x);
+		// Сделать элемент y лидером множества {x}
+		// Причём происходит объеденение множеств {y} и {x}
+		void follow(T x, T y);
 
-		size_t count(T x) const;
-
-		T unite(T x, T y);
-
+		// Проверка на содержание x и y в одном множестве
 		bool equal(T x, T y);
 
+		// То же без сжатия пути
 		bool equal(T x, T y) const;
 
 		void clear();
 
+		// find() только через оператор
+		// Если элемента x нет в структуре, то создаёт его а затем возвращает его же как единственный его элемент подмножества {x}
 		T operator[](T x);
 
+		// То же самое без сжатия путей
 		const T &operator[](T x) const;
 
 		mapped_dsu &operator=(const mapped_dsu &other);
 
+		// Получения константной ссылки на значения внутри системы непересекающихся множеств
+		// Она недоступна к изменению. Пользуйся make_set
 		const std::vector<T> &values() const;
 
 		~mapped_dsu();
@@ -66,42 +80,27 @@ namespace
 		int index = static_cast<int>(m_parent.size());
 
 		m_parent.push_back(index);
-		m_rank.push_back(0);
-		m_count.push_back(1);
-
 		m_value.push_back(x);
 		m_index.insert(std::pair<T, int>(x, index));
 	}
 
 	template <typename T>
-	T mapped_dsu<T>::leader(T x)
+	T mapped_dsu<T>::find(T x)
 	{
 		// Уже проверено исключение
-		return m_value[dsu::leader(m_index.at(x))];
+		return m_value[dsu::find(m_index.at(x))];
 	}
 
 	template <typename T>
-	T mapped_dsu<T>::leader(T x) const
+	T mapped_dsu<T>::find(T x) const
 	{
-		return m_value[dsu::leader(m_index.at(x))];
+		return m_value[dsu::find(m_index.at(x))];
 	}
 
 	template <typename T>
-	size_t mapped_dsu<T>::count(T x)
+	void mapped_dsu<T>::follow(T x, T y)
 	{
-		return dsu::count(m_index.at(x));
-	}
-
-	template <typename T>
-	size_t mapped_dsu<T>::count(T x) const
-	{
-		return dsu::count(m_index.at(x));
-	}
-
-	template <typename T>
-	T mapped_dsu<T>::unite(T x, T y)
-	{
-		return m_value[dsu::unite(m_index.at(x), m_index.at(y))];
+		dsu::follow(m_index.at(x), m_index.at(y));
 	}
 
 	template <typename T>
@@ -139,13 +138,13 @@ namespace
 			return x;
 		}
 
-		return m_value[dsu::leader(it->second)];
+		return m_value[dsu::find(it->second)];
 	}
 
 	template <typename T>
 	const T &mapped_dsu<T>::operator[](T x) const
 	{
-		return m_value[dsu::leader(m_index.at(x))];
+		return m_value[dsu::find(m_index.at(x))];
 	}
 
 	template <typename T>

@@ -3,6 +3,9 @@
 #include <vector>
 #include <fstream>
 #include <cmath>
+#include <random>
+
+#include <chrono>
 
 using namespace std;
 
@@ -16,7 +19,7 @@ public:
 	friend class LinMatrix<_Dimentions>;
 
 private:
-	double _value[_Dimentions * _Dimentions];
+	double _value[_Dimentions];
 
 public:
 	LinVector()
@@ -162,21 +165,21 @@ public:
 	friend ostream &operator<<(ostream &stream, const LinVector<_Dimentions1> &vec);
 };
 
-template <int _Dimentions>
-LinVector<_Dimentions> operator*(double x, const LinVector<_Dimentions> &vec)
+template <int _Dimentions1>
+LinVector<_Dimentions1> operator*(double x, const LinVector<_Dimentions1> &vec)
 {
-	LinVector<_Dimentions> result;
+	LinVector<_Dimentions1> result;
 
-	for (int i = 0; i < _Dimentions; ++i)
+	for (int i = 0; i < _Dimentions1; ++i)
 		result._value[i] = vec._value[i] * x;
 
 	return result;
 }
 
-template <int _Dimentions>
-ostream &operator<<(ostream &stream, const LinVector<_Dimentions> &vec)
+template <int _Dimentions1>
+ostream &operator<<(ostream &stream, const LinVector<_Dimentions1> &vec)
 {
-	for (int i = 0; i < _Dimentions; ++i)
+	for (int i = 0; i < _Dimentions1; ++i)
 		stream << vec._value[i] << '\t';
 
 	return stream;
@@ -337,8 +340,7 @@ public:
 		return result;
 	}
 
-	LinMatrix<_Dimentions>
-	operator*(double x) const
+	LinMatrix<_Dimentions> operator*(double x) const
 	{
 		LinMatrix<_Dimentions> result;
 
@@ -411,24 +413,33 @@ public:
 	friend ifstream &operator>>(ifstream &stream, LinMatrix<_Dimentions1> &matrix);
 };
 
-template <int _Dimentions>
-LinMatrix<_Dimentions> operator*(double x, const LinMatrix<_Dimentions> &matrix)
+template <int _Dimentions1>
+LinMatrix<_Dimentions1> operator*(double x, const LinMatrix<_Dimentions1> &matrix)
 {
-	LinMatrix<_Dimentions> result;
+	LinMatrix<_Dimentions1> result;
 
-	for (int i = 0; i < _Dimentions * _Dimentions; ++i)
+	for (int i = 0; i < _Dimentions1 * _Dimentions1; ++i)
 		result._value[i] = matrix._value[i] * x;
 
 	return result;
 }
 
-template <int _Dimentions>
-ostream &operator<<(ostream &stream, const LinMatrix<_Dimentions> &matrix)
+template <int _Dimentions1>
+ofstream &operator<<(ofstream &stream, const LinMatrix<_Dimentions1> &matrix)
 {
-	for (int i = 0; i < _Dimentions; ++i)
+	for (int i = 0; i < _Dimentions1 * _Dimentions1; ++i)
+		stream << ' ' << matrix._value[i];
+
+	return stream;
+}
+
+template <int _Dimentions1>
+ostream &operator<<(ostream &stream, const LinMatrix<_Dimentions1> &matrix)
+{
+	for (int i = 0; i < _Dimentions1; ++i)
 	{
-		for (int j = 0; j < _Dimentions; ++j)
-			stream << matrix._value[i * _Dimentions + j] << '\t';
+		for (int j = 0; j < _Dimentions1; ++j)
+			stream << matrix._value[i * _Dimentions1 + j] << '\t';
 
 		stream << '\n';
 	}
@@ -436,24 +447,14 @@ ostream &operator<<(ostream &stream, const LinMatrix<_Dimentions> &matrix)
 	return stream;
 }
 
-template <int _Dimentions>
-ofstream &operator<<(ofstream &stream, const LinMatrix<_Dimentions> &matrix)
+template <int _Dimentions1>
+ifstream &operator>>(ifstream &stream, LinMatrix<_Dimentions1> &matrix)
 {
-	for (int i = 0; i < _Dimentions * _Dimentions; ++i)
-		stream << ' ' << matrix._value[i];
-
-	return stream;
-}
-
-template <int _Dimentions>
-ifstream &operator>>(ifstream &stream, LinMatrix<_Dimentions> &matrix)
-{
-	for (int i = 0; i < _Dimentions * _Dimentions; ++i)
+	for (int i = 0; i < _Dimentions1 * _Dimentions1; ++i)
 		stream >> matrix._value[i];
 
 	return stream;
 }
-
 // Метод степенных итераций
 template <int N>
 void powerIteration(const LinMatrix<N> &matrix, double &eigenvalue, LinVector<N> &eigenvector, int maxIterations = 1000, double tolerance = 1e-6)
@@ -582,37 +583,72 @@ void qrAlgorithm(LinMatrix<N> matrix, double eigenvalues[N], int maxIterations =
 	}
 }
 
+const int TEST_DIM = 50; // 10 20 30 40 50
+
 int main(int argc, char *argv[])
 {
 	// Пример матрицы (линейный оператор)
-	LinMatrix<2> matrix({{2.0, 1.0},
-						 {1.0, 3.0}});
+	LinMatrix<2> matrix2x2({{2.0, 1.0},
+							{1.0, 3.0}});
 
-	cout << matrix.getInversed() << endl;
+	cout << matrix2x2.getInversed() << endl;
 
 	ofstream file("test.txt");
-	file << matrix;
+	file << matrix2x2;
 	file.close();
 
-	LinMatrix<2> matrix2;
+	LinMatrix<2> matrix2x2_1;
 
 	ifstream file2("test.txt");
-	file2 >> matrix2;
+	file2 >> matrix2x2_1;
 	file2.close();
 
-	cout << matrix2;
+	cout << matrix2x2_1;
 
-	double eigenvalue = 3.0;
-	LinVector<2> eigenvector({1.0, 2.0});
+	double eigenvalue2 = 3.0;
+	LinVector<2> eigenvector2({1.0, 2.0});
 
 	// Вызов метода степенных итераций
-	powerIteration(matrix, eigenvalue, eigenvector);
+	powerIteration(matrix2x2_1, eigenvalue2, eigenvector2);
 
 	// Вывод результата
-	cout << "Eigenvalue: " << eigenvalue << endl
-		 << "Eigenvector: " << eigenvector << endl;
+	cout << "Eigenvalue: " << eigenvalue2 << endl
+		 << "Eigenvector: " << eigenvector2 << endl;
 
-	cout << endl;
+	cout << "Power Iteration 20 matrixies " << TEST_DIM << "x" << TEST_DIM << "\n\n";
+
+	int tmin = 100000, tmax = 0, tsum = 0;
+
+	// Замеры
+	for (int i = 0; i < 20; i++)
+	{
+		LinMatrix<TEST_DIM> matrix;
+
+		uniform_real_distribution<double> unif(-100.0, 100.0);
+		default_random_engine re;
+
+		for (int j = 0; j < TEST_DIM; j++)
+			for (int k = 0; k < TEST_DIM; k++)
+				matrix.setValue(j, k, unif(re));
+
+		double eigenvalue = 1.0;
+		LinVector<TEST_DIM> eigenvector;
+
+		auto begin = chrono::steady_clock::now();
+
+		powerIteration(matrix, eigenvalue, eigenvector, 100'000, __DBL_EPSILON__);
+
+		auto end = chrono::steady_clock::now();
+		int len = chrono::duration_cast<chrono::milliseconds>(end - begin).count();
+
+		tsum += len;
+		tmin = std::min(tmin,len);
+		tmax = std::max(tmax,len);
+
+		cout << "Elapsed: " << len << " ms\n";
+	}
+	
+	cout << "\nMin: " << tmin << " ms\nMax:" << tmax << " ms\nAverage: " << tsum / 20 << " ms\n";
 
 	return 0;
 }

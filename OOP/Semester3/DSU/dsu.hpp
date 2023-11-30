@@ -1,42 +1,51 @@
+#pragma once
+
 #include <stdexcept>
 #include <vector>
 
 namespace
 {
+	// Система непересекающихся множеств на массиве
 	class dsu
 	{
 	protected:
-		std::vector<int> m_rank,	 // Ранги вершин
-			m_parent;				 // Родители вершин
-		std::vector<size_t> m_count; // Мощность множества
+		std::vector<int> m_parent; // Родители вершин
 
 	public:
 		dsu(size_t size = 0);
 
 		dsu(const dsu &other);
 
-		int leader(int x);
+		// Текущий представитель множества {x}
+		// + эвристика сжатия пути
+		int find(int x);
 
-		int leader(int x) const;
+		// Текущий представитель множества {x}
+		// без сжатия пути
+		int find(int x) const;
 
-		size_t count(int x);
-
-		size_t count(int x) const;
-
+		// Размер структуры
 		inline size_t size() const;
 
 		void resize(size_t size);
 
-		int unite(int x, int y);
+		// Сделать элемент y лидером множества {x}
+		// Причём происходит объеденение множеств {y} и {x}
+		void follow(int x, int y);
 
+		// Проверка на содержание x и y в одном множестве
 		bool equal(int x, int y);
 
+		// То же самое без сжатия путей
 		bool equal(int x, int y) const;
 
+		// Очистить структуру
 		void clear();
 
+		// find() только через оператор
 		int operator[](int x);
 
+		// То же самое без сжатия путей
 		int operator[](int x) const;
 
 		dsu &operator=(const dsu &other);
@@ -44,23 +53,17 @@ namespace
 		~dsu();
 	};
 
-	dsu::dsu(size_t size) : m_parent(size),
-							m_rank(size),
-							m_count(size)
+	dsu::dsu(size_t size) : m_parent(size)
 	{
 		for (int i = 0; i < size; i++)
 		{
 			m_parent[i] = i;
-			m_rank[i] = 0;
-			m_count[i] = 1;
 		}
 	}
 
-	dsu::dsu(const dsu &other) : m_parent(other.m_parent),
-								 m_rank(other.m_parent),
-								 m_count(other.m_count) {}
+	dsu::dsu(const dsu &other) : m_parent(other.m_parent) {}
 
-	int dsu::leader(int x)
+	int dsu::find(int x)
 	{
 		if (x < 0 || x >= m_parent.size())
 			throw std::out_of_range("");
@@ -70,10 +73,10 @@ namespace
 		if (x == p)
 			return x;
 
-		return (m_parent[x] = leader(p));
+		return (m_parent[x] = find(p));
 	}
 
-	int dsu::leader(int x) const
+	int dsu::find(int x) const
 	{
 		if (x < 0 || x >= m_parent.size())
 			throw std::out_of_range("");
@@ -83,23 +86,7 @@ namespace
 		if (x == p)
 			return x;
 
-		return leader(p);
-	}
-
-	size_t dsu::count(int x)
-	{
-		if (x < 0 || x >= m_parent.size())
-			throw std::out_of_range("");
-
-		return m_count[leader(x)];
-	}
-
-	size_t dsu::count(int x) const
-	{
-		if (x < 0 || x >= m_parent.size())
-			throw std::out_of_range("");
-
-		return m_count[leader(x)];
+		return find(p);
 	}
 
 	size_t dsu::size() const
@@ -112,33 +99,21 @@ namespace
 		if (m_parent.size() != size)
 		{
 			m_parent.resize(size);
-			m_rank.resize(size);
-			m_count.resize(size);
 		}
 	}
 
-	int dsu::unite(int x, int y)
+	void dsu::follow(int x, int y)
 	{
 		if (x < 0 || x >= m_parent.size() || y < 0 || y >= m_parent.size())
 			throw std::out_of_range("");
 
-		x = leader(x);
-		y = leader(y);
+		x = find(x);
+		y = find(y);
 
 		if (x == y)
-			return x;
+			return;
 
-		if (m_rank[x] < m_rank[y])
-			std::swap(x, y);
-
-		m_count[x] += m_count[y];
-
-		m_parent[y] = x;
-
-		if (m_rank[x] == m_rank[y])
-			m_rank[x]++;
-
-		return x;
+		m_parent[x] = y;
 	}
 
 	bool dsu::equal(int x, int y)
@@ -146,7 +121,7 @@ namespace
 		if (x < 0 || x >= m_parent.size() || y < 0 || y >= m_parent.size())
 			throw std::out_of_range("");
 
-		return leader(x) == leader(y);
+		return find(x) == find(y);
 	}
 
 	bool dsu::equal(int x, int y) const
@@ -154,31 +129,27 @@ namespace
 		if (x < 0 || x >= m_parent.size() || y < 0 || y >= m_parent.size())
 			throw std::out_of_range("");
 
-		return leader(x) == leader(y);
+		return find(x) == find(y);
 	}
 
 	void dsu::clear()
 	{
 		m_parent.clear();
-		m_rank.clear();
-		m_count.clear();
 	}
 
 	int dsu::operator[](int x)
 	{
-		return leader(x);
+		return find(x);
 	}
 
 	int dsu::operator[](int x) const
 	{
-		return leader(x);
+		return find(x);
 	}
 
 	dsu &dsu::operator=(const dsu &other)
 	{
 		m_parent = other.m_parent;
-		m_rank = other.m_rank;
-		m_count = other.m_count;
 
 		return *this;
 	}
