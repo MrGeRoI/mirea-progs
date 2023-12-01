@@ -12,6 +12,18 @@ public:
 	virtual const char *what() const noexcept { return "MatrixException"; };
 };
 
+class WrongSizeException : public MatrixException
+{
+public:
+	virtual const char *what() const noexcept { return "WrongSizeException"; };
+};
+
+class WrongIndexException : public MatrixException
+{
+public:
+	virtual const char *what() const noexcept { return "WrongIndexException"; };
+};
+
 template <class T>
 class Matrix
 {
@@ -23,7 +35,7 @@ public:
 	Matrix(int width, int height, T init_value = 0) : _width(width), _height(height), _value(new T[width * height])
 	{
 		if (width <= 0 || height <= 0)
-			throw out_of_range("");
+			throw WrongSizeException();
 
 		for (int i = 0; i < width * height; i++)
 			_value[i] = init_value;
@@ -47,21 +59,21 @@ public:
 	const T &getValue(int row, int col) const
 	{
 		if (col < 0 || col >= _width || row < 0 || row >= _height)
-			throw out_of_range("");
+			throw WrongIndexException();
 
 		return _value[row * _width + col];
 	}
 	void setValue(int row, int col, const T &value)
 	{
 		if (col < 0 || col >= _width || row < 0 || row >= _height)
-			throw out_of_range("");
+			throw WrongIndexException();
 
 		_value[row * _width + col] = value;
 	}
 	void swap(int row1, int col1, int row2, int col2)
 	{
 		if (col1 < 0 || col1 >= _width || row1 < 0 || row1 >= _height || col2 < 0 || col2 >= _width || row2 < 0 || row2 >= _height)
-			throw out_of_range("");
+			throw WrongIndexException();
 
 		std::swap(_value[row1 * _width + col1], _value[row2 * _width + col2]);
 	}
