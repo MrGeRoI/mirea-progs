@@ -1,34 +1,27 @@
-#include <list>
+#include <vector>
 #include <iostream>
 
 using namespace std;
 
-class B
+void jopa(vector<int>& vec1,vector<int>& vec2)
 {
-public:
-	int num;
-};
+	vec1.push_back(3);
+	vec1.push_back(5);
 
-class A
-{
-private:
-	int num;
-	B *b;
-public:
-	A() : num(228) { b = new B(); b->num = 10; }
-
-	int& operator * () { return b->num;}
-	const int& operator * () const { return b->num;}
-
-	~A() { delete b; }
-};
+	vec2.push_back(7);
+}
 
 int main()
 {
-	A a;
-	*a = 123;
-	cout << *a << endl;
+	vector<int> vec1,vec2;
 
+	jopa(vec1,vec2);
+
+	for(int x : vec1)
+		cout << x << endl;
+
+	for(int x : vec2)
+		cout << x << endl;
 
 	return 0;
 }
