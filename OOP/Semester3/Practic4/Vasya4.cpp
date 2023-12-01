@@ -378,22 +378,6 @@ protected:
 		}
 	}
 
-	Node *getMinimumOnSegment(Node *node, int start, int end)
-	{
-		ImplictTreap left, middle, right;
-		split(node, start, left, middle);
-		split(middle.m_root, end - start + 1, middle, right);
-
-		Node *minNode = middle.m_root->getMinimum();
-
-		// Объединяем деревья обратно
-		merge(left.m_root);
-		merge(middle.m_root);
-		merge(right.m_root);
-
-		return minNode;
-	}
-
 	int getSize(Node *node) const
 	{
 		int size = 1;
@@ -420,10 +404,31 @@ public:
 		return getSize(it.getNode());
 	}
 
-	Iterator getMinimumOnSegment(int start, int end)
-	{
-		return Iterator(getMinimumOnSegment(m_root, start, end));
-	}
+	// Функция для вычисления произведения на отрезке [start, end]
+    double getProductOnSegment(int start, int end)
+    {
+        Node *node = m_root;
+        ImplictTreap left, middle, right;
+
+        // Разделяем дерево на три части: left, middle, right
+        split(node, start, left, middle);
+        split(middle.m_root, end - start + 1, middle, right);
+
+        // Находим произведение на отрезке
+        double product = 1.0;
+        while (middle.m_root != nullptr)
+        {
+            product *= middle.m_root->m_key;
+            middle.merge(middle.m_root->m_right);
+        }
+
+        // Объединяем деревья обратно
+        merge(left.m_root);
+        merge(middle.m_root);
+        merge(right.m_root);
+
+        return product;
+    }
 
 	// доступ к корневому элементу
 	Node *getRoot() const { return Treap::getRoot(); }
@@ -498,23 +503,26 @@ int main()
 	// Создаем объект класса ImplictTreap
 	ImplictTreap treap;
 
-	// Вставляем элементы в дерево с произвольными приоритетами
-	treap.merge(1, 5);
-	treap.merge(2, 2);
-	treap.merge(3, 8);
-	treap.merge(4, 1);
-	treap.merge(5, 7);
-	treap.merge(6, 3);
+    // Вставляем элементы в дерево с произвольными приоритетами
+    treap.merge(2, 5);
+    treap.merge(3, 2);
+    treap.merge(4, 8);
+    treap.merge(5, 1);
+    treap.merge(6, 7);
+    treap.merge(7, 3);
 
-	// Выводим дерево
-	std::cout << "Original Treap:\n"
-			  << treap << std::endl;
+    // Выводим дерево
+    std::cout << "Original Treap:\n" << treap << std::endl;
 
-	// Находим минимальный элемент на заданном отрезке
-	ImplictTreap::Iterator minElement = treap.getMinimumOnSegment(2, 5);
+    // Задаем отрезок [3, 6]
+    int start = 3;
+    int end = 6;
 
-	// Выводим результат: 8
-	std::cout << "Minimum at [2;5]: " << *minElement << std::endl;
+    // Находим произведение на заданном отрезке
+    double product = treap.getProductOnSegment(start, end);
+
+    // Выводим результат
+    cout << "Product at [3;6]: " << product << endl;
 
 	return 0;
 }

@@ -6,13 +6,27 @@
 
 using namespace std;
 
-using matrix = vector<vector<int>>;
-using edge = pair<int, int>;
+struct edge
+{
+public:
+	int from, to;
+
+	edge()
+	{
+		from = to = 0;
+	}
+
+	edge(int f, int t)
+	{
+		from = f;
+		to = t;
+	}
+};
 
 // 1. Запустите функцию, реализующую алгоритм поиска в глубину,
 // для перечисления всех вершин в исходном графе. Результат должен быть
 // представлен с помощью одного из контейнеров STL
-void dfs(const matrix &graph, int start = 0)
+void dfs(const vector<vector<int>> &graph, int start, vector<int> &out_vertex)
 {
 	vector<bool> visited(graph.size(), false);
 	stack<int> vertex;
@@ -30,8 +44,8 @@ void dfs(const matrix &graph, int start = 0)
 		{
 			if (graph[v][i] != 0 && !visited[i])
 			{
-				cout << i << ", ";
 				visited[i] = true;
+				out_vertex.push_back(i);
 				vertex.push(i);
 			}
 		}
@@ -42,14 +56,14 @@ void dfs(const matrix &graph, int start = 0)
 // суммарного веса пройденных рёбер) между i-й и всеми остальными
 // пунктами, куда можно построить маршрут. Результат должен быть
 // представлен с помощью одного из контейнеров STL.
-vector<int> dijkstra(const matrix &graph, int v)
+vector<int> dijkstra(const vector<vector<int>> &graph, int v)
 {
 	int size = graph.size();
 
 	vector<int> distances(size);
 	queue<int> vertex;
 
-	for (int i = 0; i < 10; i++)
+	for (int i = 0; i < distances.size(); i++)
 		distances[i] = 10000;
 
 	vertex.push(0);
@@ -75,7 +89,7 @@ vector<int> dijkstra(const matrix &graph, int v)
 // инцидентных ребер) вершин в полученном дереве (обход дерева сделать на
 // основе поиска в ширину). Реализовать функцию подсчета средней степени по
 // всему дереву.
-void spanning_tree(matrix &graph, list<edge> &tree_edges, vector<int> &degrees)
+void spanning_tree(vector<vector<int>> &graph, list<edge> &tree_edges, vector<int> &degrees)
 {
 	int mst_weight = 0;						// Текущий вес остова.
 	list<edge> edges;						// рассматриваемые ребра
@@ -91,11 +105,11 @@ void spanning_tree(matrix &graph, list<edge> &tree_edges, vector<int> &degrees)
 	{
 		list<edge>::iterator min_it = edges.begin(), it = edges.begin();
 
-		int min_weight = graph[it->first][it->second];
+		int min_weight = graph[it->from][it->to];
 
 		for (; it != edges.end(); it++)
 		{
-			int weight = graph[it->first][it->second];
+			int weight = graph[it->from][it->to];
 
 			if (weight != 0 && weight < min_weight)
 			{
@@ -107,21 +121,21 @@ void spanning_tree(matrix &graph, list<edge> &tree_edges, vector<int> &degrees)
 		edge min_edge = *min_it;
 		edges.erase(min_it);
 
-		if (used[min_edge.second])
+		if (used[min_edge.to])
 			continue;
 
-		used[min_edge.second] = true;
+		used[min_edge.to] = true;
 		tree_edges.push_back(min_edge);
-		degrees[min_edge.first]++;
-		degrees[min_edge.second]++;
-		mst_weight += graph[min_edge.first][min_edge.second];
+		degrees[min_edge.from]++;
+		degrees[min_edge.to]++;
+		mst_weight += graph[min_edge.from][min_edge.to];
 
 		for (int i = 0; i < graph.size(); i++)
-			if (graph[min_edge.second][i] > 0 && !used[i])
-				edges.push_back(edge(min_edge.second, i));
+			if (graph[min_edge.to][i] > 0 && !used[i])
+				edges.push_back(edge(min_edge.to, i));
 	}
 }
-void bfs(const matrix &graph, vector<bool> &visited, int v)
+void bfs(const vector<vector<int>> &graph, vector<bool> &visited, int v)
 {
 	visited[v] = true;
 
@@ -135,7 +149,7 @@ void bfs(const matrix &graph, vector<bool> &visited, int v)
 		}
 }
 
-void bfs(const matrix &graph)
+void bfs(const vector<vector<int>> &graph)
 {
 	vector<bool> visited(graph.size());
 
@@ -144,7 +158,7 @@ void bfs(const matrix &graph)
 
 // 4. Реализуйте функцию построения минимального остова на основе
 // алгоритма Прима и примените её на исходном графе.
-void prime_algo(const matrix &graph, matrix &tree)
+void prime_algo(const vector<vector<int>> &graph, vector<vector<int>> &tree)
 {
 	int mst_weight = 0;						// Текущий вес остова.
 	list<edge> edges;						// рассматриваемые ребра
@@ -165,11 +179,11 @@ void prime_algo(const matrix &graph, matrix &tree)
 	{
 		list<edge>::iterator min_it = edges.begin(), it = edges.begin();
 
-		int min_weight = graph[it->first][it->second];
+		int min_weight = graph[it->from][it->to];
 
 		for (; it != edges.end(); it++)
 		{
-			int weight = graph[it->first][it->second];
+			int weight = graph[it->from][it->to];
 
 			if (weight != 0 && weight < min_weight)
 			{
@@ -181,21 +195,21 @@ void prime_algo(const matrix &graph, matrix &tree)
 		edge min_edge = *min_it;
 		edges.erase(min_it);
 
-		if (used[min_edge.second])
+		if (used[min_edge.to])
 			continue;
 
-		used[min_edge.second] = true;
-		tree[min_edge.first][min_edge.second] = graph[min_edge.first][min_edge.second];
-		tree[min_edge.second][min_edge.first] = graph[min_edge.second][min_edge.first];
-		mst_weight += graph[min_edge.first][min_edge.second];
+		used[min_edge.to] = true;
+		tree[min_edge.from][min_edge.to] = graph[min_edge.from][min_edge.to];
+		tree[min_edge.to][min_edge.from] = graph[min_edge.to][min_edge.from];
+		mst_weight += graph[min_edge.from][min_edge.to];
 
 		for (int i = 0; i < graph.size(); i++)
-			if (graph[min_edge.second][i] > 0 && !used[i])
-				edges.push_back(edge(min_edge.second, i));
+			if (graph[min_edge.to][i] > 0 && !used[i])
+				edges.push_back(edge(min_edge.to, i));
 	}
 }
 
-void print(const matrix &graph)
+void print(const vector<vector<int>> &graph)
 {
 	int size = graph.size();
 
@@ -210,25 +224,29 @@ void print(const matrix &graph)
 
 int main()
 {
-	matrix graph = {{0, 0, 0, 7, 6, 0, 1, 4, 4, 5, 6, 6, 7},
-					{0, 0, 6, 4, 4, 1, 2, 3, 2, 0, 1, 4, 2},
-					{0, 6, 0, 8, 8, 4, 3, 6, 5, 3, 6, 6, 5},
-					{7, 4, 8, 0, 5, 4, 5, 8, 0, 9, 3, 6, 8},
-					{6, 4, 8, 5, 0, 1, 4, 2, 7, 7, 7, 2, 0},
-					{0, 1, 4, 4, 1, 0, 7, 4, 4, 2, 4, 2, 6},
-					{1, 2, 3, 5, 4, 7, 0, 7, 1, 2, 2, 9, 8},
-					{4, 3, 6, 8, 2, 4, 7, 0, 8, 4, 2, 3, 2},
-					{4, 2, 5, 0, 7, 4, 1, 8, 0, 2, 5, 8, 1},
-					{5, 0, 3, 9, 7, 2, 2, 4, 2, 0, 5, 9, 7},
-					{6, 1, 6, 3, 7, 4, 2, 2, 5, 5, 0, 9, 6},
-					{6, 4, 6, 6, 2, 2, 9, 3, 8, 9, 9, 0, 5},
-					{7, 2, 5, 8, 0, 6, 8, 2, 1, 7, 6, 5, 0}};
+	vector<vector<int>> graph = {{0, 1, 4, 4, 8, 5, 6, 7, 5, 2, 4, 2},
+								 {1, 0, 6, 9, 1, 2, 3, 1, 2, 8, 9, 5},
+								 {4, 6, 0, 7, 4, 8, 9, 6, 2, 6, 7, 6},
+								 {4, 9, 7, 0, 2, 0, 0, 8, 8, 8, 7, 8},
+								 {8, 1, 4, 2, 0, 3, 9, 2, 7, 7, 3, 1},
+								 {5, 2, 8, 0, 3, 0, 0, 6, 4, 4, 5, 3},
+								 {6, 3, 9, 0, 9, 0, 0, 2, 2, 9, 2, 3},
+								 {7, 1, 6, 8, 2, 6, 2, 0, 7, 4, 2, 6},
+								 {5, 2, 2, 8, 7, 4, 2, 7, 0, 3, 4, 6},
+								 {2, 8, 6, 8, 7, 4, 9, 4, 3, 0, 3, 4},
+								 {4, 9, 7, 7, 3, 5, 2, 2, 4, 3, 0, 7},
+								 {2, 5, 6, 8, 1, 3, 3, 6, 6, 4, 7, 0}};
 
 	print(graph);
 
 	cout << "dfs: ";
-	dfs(graph);
 
+	vector<int> vertex;
+
+	dfs(graph, 0, vertex);
+
+	for (int i = 0; i < vertex.size(); i++)
+		cout << i << ", ";
 	cout << endl;
 
 	vector<int> distances = dijkstra(graph, 5);
@@ -242,16 +260,31 @@ int main()
 	spanning_tree(graph, tree_edges, tree_degrees);
 
 	for (edge e : tree_edges)
-		cout << "(" << e.first << "," << e.second << ") " << endl;
+		cout << "(" << e.from << "," << e.to << ") " << endl;
 
 	for (int i = 0; i < tree_degrees.size(); i++)
 		cout << i << ": " << tree_degrees[i] << endl;
 
-	matrix spanning;
+	vector<vector<int>> span;
 
-	prime_algo(graph, spanning);
+	prime_algo(graph, span);
 
-	print(spanning);
+	print(span);
+
+	cout << "dfs spanning: ";
+
+	vertex.clear();
+
+	dfs(span, 0, vertex);
+
+	for (int i = 0; i < vertex.size(); i++)
+		cout << i << ", ";
+	cout << endl;
+
+	distances = dijkstra(span, 5);
+
+	for (int i = 0; i < span.size(); i++)
+		cout << "5 -> " << i << ": " << distances[i] << endl;
 
 	return 0;
 }

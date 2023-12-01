@@ -33,7 +33,7 @@ public:
 	void unite(int x, int y)
 	{
 		if (m_count[x] < m_count[y])
-			swap(x, y);
+			std::swap(x, y);
 
 		int old = m_component[y], replace = m_component[x];
 
@@ -61,6 +61,11 @@ public:
 
 	void make_set(int x)
 	{
+		for (std::list<component>::const_iterator it = m_component.begin(); it != m_component.end(); it++)
+			for (component::const_iterator it2 = it->begin(); it2 != it->end(); it2++)
+				if (*it2 == x)
+					return;
+
 		component comp;
 		comp.push_back(x);
 		m_component.push_back(comp);
@@ -135,7 +140,7 @@ public:
 
 	dsu_3(const dsu_3 &other) : m_parent(other.m_parent) {}
 
-	int dsu_3::find(int x) const
+	int find(int x) const
 	{
 		int p = m_parent[x];
 
