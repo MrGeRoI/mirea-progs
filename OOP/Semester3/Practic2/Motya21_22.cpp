@@ -1,7 +1,8 @@
-//красно-черное (сблансированное) дерево map, есть интерфейс доступа к значению по ключу
+// красно-черное (сблансированное) дерево map, есть интерфейс доступа к значению по ключу
 
 #include <map>
 #include <vector>
+#include <list>
 #include <set>
 #include <string>
 #include <iostream>
@@ -115,35 +116,45 @@ istream &operator>>(istream &stream, Laptop &value)
 	return stream >> value._company >> value._model >> value._CPU >> value._storage_device >> value._screensize >> value._cores >> value._RAM >> value._storage >> value._price;
 }
 
-//Постройте функции поиска элемента по значению и по ключу.
-template<class K, class V>
-V find(const map<K,V>& tree,K key)
+// Постройте функции поиска элемента по значению и по ключу.
+template <class K, class V>
+V find(const map<K, V> &tree, K key)
 {
-	return tree.find(key)->second;
+	typename map<K, V>::const_iterator it = tree.find(key);
+
+	if (it != tree.end())
+		return it->second;
+
+	return V();
 }
 
-template<class K, class V>
-V find(const multimap<K,V>& tree,K key)
+template <class K, class V>
+V find(const multimap<K, V> &tree, K key)
 {
-	return tree.find(key)->second;
+	typename map<K, V>::const_iterator it = tree.find(key);
+
+	if (it != tree.end())
+		return it->second;
+
+	return V();
 }
 
 // Постройте функцию вывода содержимого дерева с помощью итераторов
-template<class K, class V>
-void print(const map<K,V>& tree)
+template <class K, class V>
+void print(const map<K, V> &tree)
 {
-	//итератор пробегает по map
-	for(typename map<K,V>::const_iterator it = tree.begin();it != tree.end();it++)
-		//перемещение по списку с помощью итератора, нет операции [i]
+	// итератор пробегает по map
+	for (typename map<K, V>::const_iterator it = tree.begin(); it != tree.end(); it++)
+		// перемещение по списку с помощью итератора, нет операции [i]
 		cout << it->first << ": " << it->second << '\n';
 
 	cout << endl;
 }
 
-template<class K, class V>
-void print(const multimap<K,V>& tree)
+template <class K, class V>
+void print(const multimap<K, V> &tree)
 {
-	for(typename multimap<K,V>::const_iterator it = tree.begin();it != tree.end();it++)
+	for (typename multimap<K, V>::const_iterator it = tree.begin(); it != tree.end(); it++)
 		cout << it->first << ": " << it->second << '\n';
 
 	cout << endl;
@@ -155,66 +166,66 @@ filter(), которая принимает предикат P и возвращ
 вариантов условие предиката: значение поля V выше некоторого порога
 threshold, в случае хранения нескольких полей достаточно проверить одно из
 них) */
-template<class K, class V>
-map<K,V> filter(const map<K,V>& source, bool(*pred)(V))
+template <class K, class V>
+map<K, V> filter(const map<K, V> &source, bool (*pred)(V))
 {
-	map<K,V> result;
-	
-	for(pair<K,V> item : source)
-		if(pred(item.second))
+	map<K, V> result;
+
+	for (pair<K, V> item : source)
+		if (pred(item.second))
 			result[item.first] = item.second;
 
 	return result;
 }
 
-template<class K, class V>
-multimap<K,V> filter(const multimap<K,V>& source, bool(*pred)(V))
+template <class K, class V>
+multimap<K, V> filter(const multimap<K, V> &source, bool (*pred)(V))
 {
-	multimap<K,V> result;
-	
-	for(pair<K,V> item : source)
-		if(pred(item.second))
+	multimap<K, V> result;
+
+	for (pair<K, V> item : source)
+		if (pred(item.second))
 			result.insert(item);
-		
+
 	return result;
 }
 
-template<class K, class V>
-void push(map<K,V>& dest,K key,V value)
+template <class K, class V>
+void push(map<K, V> &dest, K key, V value)
 {
-	//Введите исключения для случаев, когда пользователь пытается добавить новый элемент с ключом, уже присутствующим в дереве.
-	if(dest.count(key) > 0)
+	// Введите исключения для случаев, когда пользователь пытается добавить новый элемент с ключом, уже присутствующим в дереве.
+	if (dest.count(key) > 0)
 		throw out_of_range("There is already a key like that");
 
 	dest[key] = value;
 }
 
-template<class K, class V>
-void push(multimap<K,V>& dest,K key,V value)
+template <class K, class V>
+void push(multimap<K, V> &dest, K key, V value)
 {
-	dest.insert(pair(key,value));
+	dest.insert(pair(key, value));
 }
 
 /*Напишите функцию, которая возвращает вектор из различных значений,
 которые встречаются в объекте класса map, заполненном при решении задачи
 (рекомендуется использовать класс set)*/
-template<class K, class V>
-set<V> unique(const map<K,V>& source)
+template <class K, class V>
+set<V> unique(const map<K, V> &source)
 {
 	set<V> result;
-	
-	for(pair<K,V> item : source)
+
+	for (pair<K, V> item : source)
 		result.insert(item.second);
 
 	return result;
 }
 
-template<class K, class V>
-set<V> unique(const multimap<K,V>& source)
+template <class K, class V>
+set<V> unique(const multimap<K, V> &source)
 {
 	set<V> result;
-	
-	for(pair<K,V> item : source)
+
+	for (pair<K, V> item : source)
 		result.insert(item.second);
 
 	return result;
@@ -223,14 +234,23 @@ set<V> unique(const multimap<K,V>& source)
 /*Введите
 функцию, возвращающую все элементы дерева с одинаковыми ключами
 (ключ передаётся в функцию как параметр).*/
-template<class K, class V>
-vector<V> bykey(const multimap<K,V>& source, K key)
+template <class K, class V>
+list<V> bykey(const multimap<K, V> &source, K key)
 {
-	vector<V> result;
-	
-	for(pair<K,V> item : source)
-		if(item.first == key)
-			result.push_back(item.second);
+	typename map<K, V>::const_iterator it = source.find(key);
+
+	if (it == source.end())
+		return list<V>();
+
+	list<V> result;
+
+	for (; it != source.end(); it++)
+	{
+		if (it->first != key)
+			return result;
+
+		result.push_back(it->second);
+	}
 
 	return result;
 }
@@ -248,13 +268,13 @@ int main()
 	cout << "\nMap:\n";
 	print(marks);
 
-	map<string,Laptop> laptops;
-	laptops["asus"] =	Laptop("ASUS", "Vivobook", "Intel Core i7", "SSD", 15, 4, 16, 512, 1200);
-    laptops["dell"] =	Laptop("Dell", "Inspiron", "AMD Ryzen 5", "HDD", 14, 6, 8, 256, 800);
-    laptops["hp"] =	Laptop("HP", "Pavilion", "Intel Core i5", "SSD", 13, 2, 12, 256, 1000);
-    laptops["lenovo"] =	Laptop("Lenovo", "ThinkPad", "Intel Core i9", "SSD", 15, 8, 32, 1, 2000);
-    laptops["acer"] =	Laptop("Acer", "Aspire", "AMD Ryzen 7", "HDD", 17, 6, 16, 1, 1500);
-    laptops["apple"] =	Laptop("Apple", "MacBook Pro", "Apple M1", "SSD", 13, 8, 16, 512, 2500);
+	map<string, Laptop> laptops;
+	laptops["asus"] = Laptop("ASUS", "Vivobook", "Intel Core i7", "SSD", 15, 4, 16, 512, 1200);
+	laptops["dell"] = Laptop("Dell", "Inspiron", "AMD Ryzen 5", "HDD", 14, 6, 8, 256, 800);
+	laptops["hp"] = Laptop("HP", "Pavilion", "Intel Core i5", "SSD", 13, 2, 12, 256, 1000);
+	laptops["lenovo"] = Laptop("Lenovo", "ThinkPad", "Intel Core i9", "SSD", 15, 8, 32, 1, 2000);
+	laptops["acer"] = Laptop("Acer", "Aspire", "AMD Ryzen 7", "HDD", 17, 6, 16, 1, 1500);
+	laptops["apple"] = Laptop("Apple", "MacBook Pro", "Apple M1", "SSD", 13, 8, 16, 512, 2500);
 
 	cout << "\nStudents:\n";
 	print(laptops);
@@ -266,11 +286,12 @@ int main()
 	marks2.insert(pair("Nikolaev", 3));
 	marks2.insert(pair("Abramov", 4));
 	marks2.insert(pair("Petrov", 2));
-	
+
 	cout << "\nMultimap:\n";
 	print(marks2);
 
 	cout << "\nPetrov:\n";
-	for(int n : bykey(marks2, string("Petrov")))
+	for (int n : bykey(marks2, string("Petrov")))
 		cout << n << ", \n";
+
 }

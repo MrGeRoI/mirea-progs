@@ -38,7 +38,7 @@ namespace
 
 		void clear();
 
-		lca(const lca &other);
+		lca &operator=(const lca &other);
 
 		~lca();
 	};

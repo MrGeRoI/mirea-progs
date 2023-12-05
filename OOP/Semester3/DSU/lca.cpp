@@ -2,7 +2,9 @@
 
 #include "lca.hpp"
 
-int main(int argc, char* argv[])
+using namespace std;
+
+int main(int argc, char *argv[])
 {
 	return 0;
 }
