@@ -4,6 +4,7 @@
 #include <list>
 #include <queue>
 #include <stdexcept>
+#include <functional>
 
 using namespace std;
 
@@ -156,13 +157,12 @@ public:
 	}
 
 	// Минимального остовное дерево на основе алгоритма Прима
-	// Возвращает: граф, описывающий это деево
+	// Возвращает: граф, описывающий это дерево
 	Graph getSpanningPrime() const
 	{
 		int vertices = _matrix.size();
 		Graph tree(vertices);
 
-		int mst_weight = 0;					// Текущий вес остова.
 		list<Edge> edges;					// рассматриваемые ребра
 		vector<bool> used(vertices, false); // использованные вершины
 
@@ -203,11 +203,65 @@ public:
 			used[min_edge._to] = true;
 			tree._matrix[min_edge._from][min_edge._to] = _matrix[min_edge._from][min_edge._to];
 			tree._matrix[min_edge._to][min_edge._from] = _matrix[min_edge._to][min_edge._from];
-			mst_weight += _matrix[min_edge._from][min_edge._to];
 
 			for (int i = 0; i < vertices; i++)
 				if (_matrix[min_edge._to][i] > 0 && !used[i])
 					edges.push_back(Edge(min_edge._to, i));
+		}
+
+		return tree;
+	}
+
+	// Минимального остовное дерево на основе алгоритма Крускала
+	// Возвращает: граф, описывающий это дерево
+	Graph getSpanningKruskal() const
+	{
+		int vertices = _matrix.size();
+		Graph tree(vertices);
+
+		// Создаем приоритетную очередь для ребер, сортированную по весу
+		priority_queue<Edge, vector<Edge>, function<bool(Edge, Edge)>> pq(
+			[this](const Edge &a, const Edge &b)
+			{
+				return _matrix[a._from][a._to] > _matrix[b._from][b._to];
+			});
+
+		// Добавляем все ребра в приоритетную очередь
+		for (int i = 0; i < vertices; ++i)
+		{
+			for (int j = i + 1; j < vertices; ++j)
+			{
+				if (_matrix[i][j] > 0)
+					pq.push(Edge(i, j));
+			}
+		}
+
+		// Создаем вектор для хранения номера компонент связности
+		vector<int> component(vertices);
+
+		// Инициализируем каждую вершину отдельной компонентой
+		for (int i = 0; i < vertices; ++i)
+			component[i] = i;
+
+		// Проходим по приоритетной очереди и добавляем ребра в остовное дерево, если они не образуют цикл
+		while (!pq.empty())
+		{
+			Edge edge = pq.top();
+			pq.pop();
+
+			int componentFrom = component[edge._from];
+			int componentTo = component[edge._to];
+
+			// Если вершины ребра принадлежат разным компонентам связности, добавляем ребро в остовное дерево
+			if (componentFrom != componentTo)
+			{
+				tree._matrix[edge._from][edge._to] = tree._matrix[edge._to][edge._from] = _matrix[edge._from][edge._to];
+
+				// Объединяем компоненты связности
+				for (int i = 0; i < vertices; ++i)
+					if (component[i] == componentTo)
+						component[i] = componentFrom;
+			}
 		}
 
 		return tree;
@@ -243,11 +297,11 @@ public:
 	// Оператор вывода в файл
 	friend ofstream &operator<<(ofstream &stream, const Graph &graph)
 	{
-		stream << graph._matrix.size();
+		stream << graph._matrix.size() << ' ';
 
 		for (int i = 0; i < graph._matrix.size(); i++)
 			for (int j = i + 1; j < graph._matrix.size(); j++)
-				stream << graph._matrix[i][j];
+				stream << graph._matrix[i][j] << ' ';
 
 		return stream;
 	}
@@ -284,34 +338,55 @@ public:
 int main(int argc, char *argv[])
 {
 	// Создаём граф на основе матрицы смежности
-	Graph graph({{0, 0, 0, 7, 6, 0, 1, 4, 4, 5, 6, 6, 7},
-				 {0, 0, 6, 4, 4, 1, 2, 3, 2, 0, 1, 4, 2},
-				 {0, 6, 0, 8, 8, 4, 3, 6, 5, 3, 6, 6, 5},
-				 {7, 4, 8, 0, 5, 4, 5, 8, 0, 9, 3, 6, 8},
-				 {6, 4, 8, 5, 0, 1, 4, 2, 7, 7, 7, 2, 0},
-				 {0, 1, 4, 4, 1, 0, 7, 4, 4, 2, 4, 2, 6},
-				 {1, 2, 3, 5, 4, 7, 0, 7, 1, 2, 2, 9, 8},
-				 {4, 3, 6, 8, 2, 4, 7, 0, 8, 4, 2, 3, 2},
-				 {4, 2, 5, 0, 7, 4, 1, 8, 0, 2, 5, 8, 1},
-				 {5, 0, 3, 9, 7, 2, 2, 4, 2, 0, 5, 9, 7},
-				 {6, 1, 6, 3, 7, 4, 2, 2, 5, 5, 0, 9, 6},
-				 {6, 4, 6, 6, 2, 2, 9, 3, 8, 9, 9, 0, 5},
-				 {7, 2, 5, 8, 0, 6, 8, 2, 1, 7, 6, 5, 0}});
+	Graph graph_old({{0, 0, 0, 7, 6, 0, 1, 4, 4, 5, 6, 6, 7},
+					 {0, 0, 6, 4, 4, 1, 2, 3, 2, 0, 1, 4, 2},
+					 {0, 6, 0, 8, 8, 4, 3, 6, 5, 3, 6, 6, 5},
+					 {7, 4, 8, 0, 5, 4, 5, 8, 0, 9, 3, 6, 8},
+					 {6, 4, 8, 5, 0, 1, 4, 2, 7, 7, 7, 2, 0},
+					 {0, 1, 4, 4, 1, 0, 7, 4, 4, 2, 4, 2, 6},
+					 {1, 2, 3, 5, 4, 7, 0, 7, 1, 2, 2, 9, 8},
+					 {4, 3, 6, 8, 2, 4, 7, 0, 8, 4, 2, 3, 2},
+					 {4, 2, 5, 0, 7, 4, 1, 8, 0, 2, 5, 8, 1},
+					 {5, 0, 3, 9, 7, 2, 2, 4, 2, 0, 5, 9, 7},
+					 {6, 1, 6, 3, 7, 4, 2, 2, 5, 5, 0, 9, 6},
+					 {6, 4, 6, 6, 2, 2, 9, 3, 8, 9, 9, 0, 5},
+					 {7, 2, 5, 8, 0, 6, 8, 2, 1, 7, 6, 5, 0}});
+
+	ofstream out_file("graph.txt");
+
+	// Записываем граф в файл
+	out_file << graph_old;
+
+	out_file.close();
+
+	ifstream in_file("graph.txt");
+
+	Graph graph(13);
+
+	// Читаем граф из файла
+	in_file >> graph;
+
+	in_file.close();
 
 	// Выводим граф
 	cout << graph;
 
-	// Находим и выводим минимальное остовное дерево
-	Graph tree = graph.getSpanningPrime();
+	// Находим и выводим минимальное остовное дерево по алгоритму Прима
+	Graph prime = graph.getSpanningPrime();
 	cout << "Prime:\n"
-		 << tree;
+		 << prime;
+
+	// Находим и выводим минимальное остовное дерево по алгоритму Крускала
+	Graph kruskal = graph.getSpanningKruskal();
+	cout << "Kruskal:\n"
+		 << kruskal;
 
 	// Находим путь 0 -> 9
-	list<int> path = tree.findPath(0, 9);
+	list<int> path = prime.findPath(0, 9);
 
 	// Выводим путь
-	for (list<int>::iterator it = path.begin(); it != path.end(); it++)
-		cout << *it << " -> ";
+	for (int v : path)
+		cout << v << " -> ";
 
 	cout << endl;
 
