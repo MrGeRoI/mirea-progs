@@ -99,30 +99,30 @@ public:
 	// O(n)
 	void unite(int x, int y)
 	{
-		std::list<component>::iterator itSetY = m_component.end();
+		std::list<component>::iterator itSetX = m_component.end(), itSetY = m_component.end();
 
 		for (std::list<component>::iterator it = m_component.begin(); it != m_component.end(); it++)
 		{
-			component::iterator itX = it->end();
-
 			for (component::iterator it2 = it->begin(); it2 != it->end(); it2++)
 			{
 				if (*it2 == x)
-					return;
+					itSetX = it;
 
 				if (*it2 == y)
-				{
 					itSetY = it;
-					break;
-				}
 			}
 
-			if (itSetY != m_component.end())
-				break;
-		}
+			if (itSetX != m_component.end() && itSetY != m_component.end())
+			{
+				if(itSetX->size() > itSetY->size())
+					std::swap(itSetX,itSetY);
 
-		if (itSetY != m_component.end())
-			itSetY->push_back(x);
+				for(int v : *itSetX)
+					itSetY->push_front(v);
+
+				m_component.erase(itSetX);
+			}
+		}
 	}
 };
 

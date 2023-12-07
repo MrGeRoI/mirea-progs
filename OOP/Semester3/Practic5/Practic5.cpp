@@ -3,6 +3,7 @@
 #include <queue>
 #include <stack>
 #include <list>
+#include <functional>
 
 using namespace std;
 
@@ -42,29 +43,31 @@ void dfs(const matrix &graph, int start, vector<int> &out_vertex)
 // суммарного веса пройденных рёбер) между i-й и всеми остальными
 // пунктами, куда можно построить маршрут. Результат должен быть
 // представлен с помощью одного из контейнеров STL.
-vector<int> dijkstra(const matrix &graph, int v)
+vector<int> dijkstra(const matrix &graph, int v = 0)
 {
 	int size = graph.size();
 
 	vector<int> distances(size);
-	queue<int> vertex;
+
+	priority_queue<int, vector<int>, function<bool(int, int)>> vertex([distances](int x, int y)
+																	  { return distances[x] > distances[y]; });
 
 	for (int i = 0; i < distances.size(); i++)
 		distances[i] = 10000;
 
-	vertex.push(0);
-	distances[0] = 0;
+	distances[v] = 0;
+	vertex.push(v);
 
 	while (!vertex.empty())
 	{
-		int cur_vertex = vertex.front();
+		int cur_vertex = vertex.top();
 		vertex.pop();
 
 		for (int i = 0; i < size; i++)
 			if (graph[cur_vertex][i] != 0 && distances[i] > distances[cur_vertex] + graph[cur_vertex][i])
 			{
-				vertex.push(i);
 				distances[i] = distances[cur_vertex] + graph[cur_vertex][i];
+				vertex.push(i);
 			}
 	}
 
@@ -75,37 +78,24 @@ vector<int> dijkstra(const matrix &graph, int v)
 // инцидентных ребер) вершин в полученном дереве (обход дерева сделать на
 // основе поиска в ширину). Реализовать функцию подсчета средней степени по
 // всему дереву.
-void spanning_tree(matrix &graph, list<edge> &tree_edges, vector<int> &degrees)
+void spanning_tree(const matrix &graph, list<edge> &tree_edges, vector<int> &degrees)
 {
-	int mst_weight = 0;						// Текущий вес остова.
-	list<edge> edges;						// рассматриваемые ребра
+	int mst_weight = 0;						// Текущий вес остова.					
 	vector<bool> used(graph.size(), false); // использованные вершины
+	priority_queue<edge, vector<edge>, function<bool(edge, edge)>> edges([graph](const edge& x, const edge& y) 
+																	  { return graph[x.first][x.second] > graph[y.first][y.second]; }); // рассматриваемые ребра
+
 	degrees.resize(graph.size());
 
 	used[0] = true; // Начнём с вершины 0.
 	for (int i = 0; i < graph.size(); i++)
 		if (graph[0][i] > 0)
-			edges.push_back(edge(0, i));
+			edges.push(edge(0, i));
 
 	while (!edges.empty())
 	{
-		list<edge>::iterator min_it = edges.begin(), it = edges.begin();
-
-		int min_weight = graph[it->first][it->second];
-
-		for (; it != edges.end(); it++)
-		{
-			int weight = graph[it->first][it->second];
-
-			if (weight != 0 && weight < min_weight)
-			{
-				min_it = it;
-				min_weight = weight;
-			}
-		}
-
-		edge min_edge = *min_it;
-		edges.erase(min_it);
+		edge min_edge = edges.top();
+		edges.pop();
 
 		if (used[min_edge.second])
 			continue;
@@ -118,7 +108,7 @@ void spanning_tree(matrix &graph, list<edge> &tree_edges, vector<int> &degrees)
 
 		for (int i = 0; i < graph.size(); i++)
 			if (graph[min_edge.second][i] > 0 && !used[i])
-				edges.push_back(edge(min_edge.second, i));
+				edges.push(edge(min_edge.second, i));
 	}
 }
 void bfs(const matrix &graph, vector<bool> &visited, int v)
@@ -270,8 +260,9 @@ int main()
 
 	distances = dijkstra(span, 5);
 
-	for (int i = 0; i < span.size(); i++)
-		cout << "5 -> " << i << ": " << distances[i] << endl;
+	for (int i = 0; i < distances.size(); i++)
+		if (i != 5)
+			cout << "5 -> " << i << ": " << distances[i] << endl;
 
 	return 0;
 }

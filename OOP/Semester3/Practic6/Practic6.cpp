@@ -4,6 +4,7 @@
 #include <stack>
 #include <list>
 #include <set>
+#include <functional>
 
 using namespace std;
 
@@ -23,28 +24,31 @@ int find_path(const matrix &graph, matrix &total_flow, int source, int target) /
 	flow[source] = INFINITY;
 	vector<bool> used(vertices, false);
 
-	stack<int> s;
-	s.push(source);
+	priority_queue<int, vector<int>, function<bool(int, int)>> vertex([flow](int x, int y)
+																	  { return flow[x] < flow[y]; });
 
-	while (!s.empty())
+	vertex.push(source);
+
+	while (!vertex.empty())
 	{
-		int vertex = s.top();
+		int v = vertex.top();
 
-		if (vertex == target)
+		if (v == target)
 			break;
 
-		s.pop();
+		vertex.pop();
 
 		for (int i = 0; i < vertices; i++)
-			// есть ребро vertex->i, в i не заходили
-			if (graph[vertex][i] - total_flow[vertex][i] > 0 && !used[i])
+			// есть ребро v->i, в i не заходили
+			if (graph[v][i] - total_flow[v][i] > 0 && !used[i])
 			{
-				s.push(i);
-				flow[i] = (graph[vertex][i] - total_flow[vertex][i] < flow[vertex]) ? graph[vertex][i] - total_flow[vertex][i] : flow[vertex];
-				link[i] = vertex;
+				flow[i] = (graph[v][i] - total_flow[v][i] < flow[v]) ? graph[v][i] - total_flow[v][i] : flow[v];
+				link[i] = v;
+
+				vertex.push(i);
 			}
 
-		used[vertex] = true;
+		used[v] = true;
 	}
 
 	if (link[target] == -1)

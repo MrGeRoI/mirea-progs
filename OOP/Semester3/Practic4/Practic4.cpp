@@ -43,6 +43,14 @@ public:
 			return (Node *)this;
 		}
 
+		virtual Node *getMaximum() const
+		{
+			if (m_right != nullptr)
+				return m_right->getMaximum();
+
+			return (Node *)this;
+		}
+
 		Node *getSuccessor() const
 		{
 			if (m_right != nullptr)
@@ -54,6 +62,22 @@ public:
 				current = current->m_parent;
 
 			return current;
+		}
+
+		virtual Node *getPredecessor() const
+		{
+			if (m_left != nullptr)
+				return m_left->getMaximum();
+
+			if (m_parent == nullptr)
+				return nullptr;
+
+			Node *current = (Node *)this;
+
+			while (current->m_parent != nullptr && current->m_parent->m_left == current)
+				current = current->m_parent;
+
+			return current->m_parent;
 		}
 
 		friend ostream &operator<<(ostream &stream, const Node &node)
@@ -177,14 +201,18 @@ protected:
 			left.merge(Current->m_left);
 			left.merge(Current->m_key, Current->m_priority);
 
-			return split(Current->m_right, x, left, right);
+			right.merge(Current->getSuccessor());
+
+			return Current;
 		}
 		else
 		{
 			right.merge(Current->m_right);
 			right.merge(Current->m_key, Current->m_priority);
 
-			return split(Current->m_left, x, left, right);
+			right.merge(Current->getPredecessor());
+
+			return Current;
 		}
 	}
 
@@ -348,13 +376,9 @@ protected:
 			right.m_root->m_left = nullptr;
 
 			if (Current->m_left)
-			{
 				left.m_root = split(Current->m_left, x, left, right);
-			}
 			else
-			{
 				left.m_root = nullptr;
-			}
 
 			right.m_root->m_parent = nullptr;
 			return left.m_root;
@@ -365,13 +389,9 @@ protected:
 			left.m_root->m_right = nullptr;
 
 			if (Current->m_right)
-			{
 				right.m_root = split(Current->m_right, x - leftSize - 1, left, right);
-			}
 			else
-			{
 				right.m_root = nullptr;
-			}
 
 			left.m_root->m_parent = nullptr;
 			return right.m_root;
