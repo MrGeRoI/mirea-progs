@@ -7,7 +7,6 @@ using namespace std;
 class Treap
 {
 public:
-	// класс узел
 	struct Node
 	{
 	public:
@@ -153,128 +152,97 @@ public:
 	};
 
 protected:
-	// корень - его достаточно для хранения всего дерева
 	Node *m_root;
 
-	virtual Node *merge(Node *left, Node *right)
+	Node *merge(Node *left, Node *right)
 	{
-		// При выполнении операции left.merge(right) предполагается, что в левом дереве left все
-		// ключи меньше любого ключа из правого дерева right.
+		if (left == nullptr || right == nullptr)
+			return (left) ? left : right;
+
 		if (left->m_priority > right->m_priority)
 		{
-			if (left->m_right)
-				left->m_right = merge(left->m_right, right);
+			if (left->m_key < right->m_key)
+			{
+				Node *tmp = merge(left->m_right, right);
+
+				if (tmp != nullptr)
+					tmp->m_parent = left;
+
+				left->m_right = tmp;
+			}
 			else
-				left->m_right = right;
+			{
+				Node *tmp = merge(left->m_left, right);
+
+				if (tmp != nullptr)
+					tmp->m_parent = left;
+
+				left->m_left = tmp;
+			}
+			return left;
 		}
 		else
 		{
-			if (right->m_left)
-				right->m_left = merge(left, right->m_left);
+			if (left->m_key < right->m_key)
+			{
+				Node *tmp = merge(left, right->m_left);
+
+				if (tmp != nullptr)
+					tmp->m_parent = right;
+
+				right->m_left = tmp;
+			}
 			else
-				right->m_left = left;
+			{
+				Node *tmp = merge(left, right->m_right);
 
-			left = right;
-		}
+				if (tmp != nullptr)
+					tmp->m_parent = right;
 
-		return left;
-	}
+				right->m_right = tmp;
+			}
 
-	virtual Node *split(Node *Current, int x, Treap &left, Treap &right)
-	{
-		if (m_root == nullptr || Current == nullptr)
-			return nullptr;
-
-		if (Current->m_key == x)
-		{
-			Node *Res = Current;
-			left.merge(Current->m_left);
-			right.merge(Current->m_right);
-			Res->m_left = nullptr;
-			Res->m_right = nullptr;
-			// Res->setParent(nullptr);
-			return Res;
-		}
-
-		if (Current->m_key < x)
-		{
-			left.merge(Current->m_left);
-			left.merge(Current->m_key, Current->m_priority);
-
-			right.merge(Current->getSuccessor());
-
-			return Current;
-		}
-		else
-		{
-			right.merge(Current->m_right);
-			right.merge(Current->m_key, Current->m_priority);
-
-			right.merge(Current->getPredecessor());
-
-			return Current;
+			return right;
 		}
 	}
 
-	// Реализуйте операции объединения деревьев merge(),
-	virtual void merge(Node *node)
+	Node *merge(Node *node)
 	{
-		if (m_root == nullptr)
-		{
-			m_root = node;
-			return;
-		}
-		if (node == nullptr)
-			return; // this;
+		return m_root = merge(m_root, node);
+	}
 
-		if (m_root->m_priority > node->m_priority)
+	Node *split(Node *root, int x, Treap &left, Treap &right)
+	{
+		if (left.m_root || right.m_root)
+			throw invalid_argument("");
+
+		for (Node *node = root->getMinimum(); node != nullptr; node = node->getSuccessor())
 		{
-			if (m_root->m_right != nullptr)
-				m_root->m_right = merge(m_root->m_right, node);
+			if (node->m_key < x)
+				left.merge(new Node(node->m_key, node->m_priority));
 			else
-				m_root->m_right = node;
+				right.merge(new Node(node->m_key, node->m_priority));
 		}
-		else
-		{
-			if (node->m_left != nullptr)
-				node->m_left = merge(m_root, node->m_left);
-			else
-				node->m_left = m_root;
-			m_root = node;
-		}
+
+		return root;
 	}
 
 public:
-	// доступ к корневому элементу
 	Node *getRoot() const { return m_root; }
 
-	// конструктор дерева: в момент создания дерева ни одного узла нет, корень смотрит в никуда
 	Treap(Node *root = nullptr) { m_root = root; }
 
-	void preOrder(Node *node, void (*func)(Node *))
+	Iterator merge(int key, int priority)
 	{
-		if (node)
-			func(node);
-
-		if (node && node->m_left)
-			preOrder(node->m_left, func);
-
-		if (node && node->m_right)
-			preOrder(node->m_right, func);
+		return Iterator(merge(new Node(key, priority)));
 	}
 
-	virtual void merge(int key, int priority)
+	Iterator merge(Treap &tree)
 	{
-		merge(new Node(key, priority));
+		return Iterator(merge(tree.m_root));
 	}
 
-	virtual void merge(Treap &tree)
-	{
-		merge(tree.m_root);
-	}
-
-	// разрезания деревьев по ключу split().
-	virtual Iterator split(int x, Treap &left, Treap &right)
+	Iterator split(int x, Treap &left, Treap &right)
 	{
 		return Iterator(split(m_root, x, left, right));
 	}
@@ -298,8 +266,7 @@ public:
 	}
 };
 
-// Создайте класс «Декартово дерево по неявному ключу», унаследовав
-// его с ключевым словом protected от класса из задания №4.1.
+// Декартово дерево по неявному ключу
 class ImplictTreap : protected Treap
 {
 public:
@@ -307,76 +274,54 @@ public:
 	using Treap::Node;
 
 protected:
-	virtual Node *merge(Node *left, Node *right)
+	Node *merge(Node *left, Node *right)
 	{
-		// При выполнении операции left.merge(right) предполагается, что в левом дереве left все
-		// ключи меньше любого ключа из правого дерева right.
+		if (!left || !right)
+			return (left) ? left : right;
+
 		if (left->m_priority > right->m_priority)
 		{
-			if (left->m_right)
-				left->m_right = merge(left->m_right, right);
-			else
-				left->m_right = right;
+			Node *tmp = merge(left->m_right, right);
+
+			if (tmp != nullptr)
+				tmp->m_parent = left;
+
+			left->m_right = tmp;
+
+			return left;
 		}
 		else
 		{
-			if (right->m_left)
-				right->m_left = merge(left, right->m_left);
-			else
-				right->m_left = left;
+			Node *tmp = merge(left, right->m_left);
 
-			left = right;
-		}
+			if (tmp != nullptr)
+				tmp->m_parent = right;
 
-		return left;
-	}
+			right->m_left = tmp;
 
-	// Переопределите
-	// слияние деревьев (работает так же, как merge() в родителе, но без учёта
-	// ключей).
-	virtual void merge(Node *node)
-	{
-		if (m_root == nullptr)
-		{
-			m_root = node;
-			return;
-		}
-		if (node == nullptr)
-			return; // this;
-
-		if (m_root->m_priority > node->m_priority)
-		{
-			if (m_root->m_right != nullptr)
-				m_root->m_right = Treap::merge(m_root->m_right, node);
-			else
-				m_root->m_right = node;
-		}
-		else
-		{
-			if (node->m_left != nullptr)
-				node->m_left = Treap::merge(m_root, node->m_left);
-			else
-				node->m_left = m_root;
-			m_root = node;
+			return right;
 		}
 	}
 
-	// Переопределите разделение дерева split() так, чтобы оно работало по
-	// значению групповой функции size().
-	virtual Node *split(Node *Current, int x, ImplictTreap &left, ImplictTreap &right)
+	Node *merge(Node *node)
 	{
-		if (m_root == nullptr || Current == nullptr)
+		return Treap::merge(node);
+	}
+
+	Node *split(Node *current, int x, ImplictTreap &left, ImplictTreap &right)
+	{
+		if (m_root == nullptr || current == nullptr)
 			return nullptr;
 
-		int leftSize = getSize(Current->m_left);
+		int leftSize = getSize(current->m_left);
 
 		if (leftSize >= x)
 		{
-			right.m_root = Current;
+			right.m_root = current;
 			right.m_root->m_left = nullptr;
 
-			if (Current->m_left)
-				left.m_root = split(Current->m_left, x, left, right);
+			if (current->m_left)
+				left.m_root = split(current->m_left, x, left, right);
 			else
 				left.m_root = nullptr;
 
@@ -385,11 +330,11 @@ protected:
 		}
 		else
 		{
-			left.m_root = Current;
+			left.m_root = current;
 			left.m_root->m_right = nullptr;
 
-			if (Current->m_right)
-				right.m_root = split(Current->m_right, x - leftSize - 1, left, right);
+			if (current->m_right)
+				right.m_root = split(current->m_right, x - leftSize - 1, left, right);
 			else
 				right.m_root = nullptr;
 
@@ -400,31 +345,29 @@ protected:
 
 	Node *getMinimumOnSegment(Node *node, int start, int end)
 	{
-		ImplictTreap left, middle, right;
-		split(node, start, left, middle);
-		split(middle.m_root, end - start + 1, middle, right);
+		if (!node)
+			return nullptr;
 
-		Node *minNode = middle.m_root->getMinimum();
+		if (!node->m_left)
+			return node;
 
-		// Объединяем деревья обратно
-		merge(left.m_root);
-		merge(middle.m_root);
-		merge(right.m_root);
+		int leftSize = getSize(node->m_left);
 
-		return minNode;
+		if (start == leftSize && end == leftSize)
+			return node;
+
+		if (start < leftSize)
+			return getMinimumOnSegment(node->m_left, start, std::min(end, leftSize - 1));
+		else
+			return getMinimumOnSegment(node->m_right, start - leftSize - 1, end - leftSize - 1);
 	}
 
 	int getSize(Node *node) const
 	{
-		int size = 1;
+		if (!node)
+			return 0;
 
-		if (node->m_left)
-			size += getSize(node->m_left);
-
-		if (node->m_right)
-			size += getSize(node->m_right);
-
-		return size;
+		return 1 + getSize(node->m_left) + getSize(node->m_right);
 	}
 
 public:
@@ -433,8 +376,6 @@ public:
 		return getSize(m_root);
 	}
 
-	// Введите групповую функции size() – число элементов в дереве, корнем
-	// которого является текущий узел.
 	int getSize(Iterator it) const
 	{
 		return getSize(it.getNode());
@@ -445,26 +386,19 @@ public:
 		return Iterator(getMinimumOnSegment(m_root, start, end));
 	}
 
-	// доступ к корневому элементу
 	Node *getRoot() const { return Treap::getRoot(); }
 
-	void preOrder(Node *node, void (*func)(Node *))
+	Iterator merge(int key, int priority)
 	{
-		Treap::preOrder(node, func);
+		return Treap::merge(key, priority);
 	}
 
-	virtual void merge(int key, int priority)
+	Iterator merge(ImplictTreap &tree)
 	{
-		Treap::merge(key, priority);
+		return Treap::merge(tree);
 	}
 
-	virtual void merge(Treap &tree)
-	{
-		Treap::merge(tree);
-	}
-
-	// разрезания деревьев по ключу split().
-	virtual Iterator split(int x, Treap &left, Treap &right)
+	Iterator split(int x, ImplictTreap &left, ImplictTreap &right)
 	{
 		return Treap::split(x, left, right);
 	}
@@ -513,7 +447,7 @@ int main()
 		 << tree2;
 
 	if (it != tree.end())
-		cout << "\nNode: " << *it;
+		cout << "\nNode: " << *it << endl;
 
 	// Создаем объект класса ImplictTreap
 	ImplictTreap treap;
@@ -533,7 +467,7 @@ int main()
 	// Находим минимальный элемент на заданном отрезке
 	ImplictTreap::Iterator minElement = treap.getMinimumOnSegment(2, 5);
 
-	// Выводим результат: 8
+	// Выводим результат: 1
 	cout << "Minimum at [2;5]: " << *minElement << endl;
 
 	return 0;
