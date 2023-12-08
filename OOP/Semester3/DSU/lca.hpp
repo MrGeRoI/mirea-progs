@@ -18,11 +18,34 @@ namespace
 		void dfs(int x);
 
 	public:
-		lca(size_t size = 0);
+		lca(size_t size = 0) : m_class(size),
+							m_ancestor(size, -1),
+							m_visited(size, false),
+							m_component(size),
+							m_graph(size * size, false),
+							m_lca(size * size, -1) {}
 
-		lca(const lca &other);
 
-		void joint(int x, int y);
+		lca(const lca &other) : m_class(other.m_class),
+								 m_ancestor(other.m_ancestor),
+								 m_component(other.m_component),
+								 m_visited(other.m_visited),
+								 m_graph(other.m_graph),
+								 m_lca(other.m_lca) {}
+
+
+		void joint(int x, int y)
+	{
+		if (x < 0 || x >= m_class.size() || y < 0 || y >= m_class.size())
+			throw std::out_of_range("");
+
+		if (x == y || m_component.equal(x, y))
+			throw std::invalid_argument(""); // Появление цикла приводит к потере структуры дерева
+
+		m_graph[x * m_class.size() + y] = m_graph[y * m_class.size() + x] = true;
+
+		m_component.unite(x, y);
+	}
 
 		bool edge(int x, int y) const;
 
@@ -42,33 +65,6 @@ namespace
 
 		~lca();
 	};
-
-	lca::lca(size_t size) : m_class(size),
-							m_ancestor(size, -1),
-							m_visited(size, false),
-							m_component(size),
-							m_graph(size * size, false),
-							m_lca(size * size, -1) {}
-
-	lca::lca(const lca &other) : m_class(other.m_class),
-								 m_ancestor(other.m_ancestor),
-								 m_component(other.m_component),
-								 m_visited(other.m_visited),
-								 m_graph(other.m_graph),
-								 m_lca(other.m_lca) {}
-
-	void lca::joint(int x, int y)
-	{
-		if (x < 0 || x >= m_class.size() || y < 0 || y >= m_class.size())
-			throw std::out_of_range("");
-
-		if (x == y || m_component.equal(x, y))
-			throw std::invalid_argument(""); // Появление цикла приводит к потере структуры дерева
-
-		m_graph[x * m_class.size() + y] = m_graph[y * m_class.size() + x] = true;
-
-		m_component.unite(x, y);
-	}
 
 	bool lca::edge(int x, int y) const
 	{

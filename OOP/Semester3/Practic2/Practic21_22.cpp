@@ -3,6 +3,7 @@
 #include <map>
 #include <vector>
 #include <set>
+#include <list>
 #include <string>
 #include <iostream>
 #include <exception>
@@ -205,14 +206,18 @@ set<V> unique(const multimap<K,V>& source)
 /*Введите
 функцию, возвращающую все элементы дерева с одинаковыми ключами
 (ключ передаётся в функцию как параметр).*/
-template<class K, class V>
-vector<V> bykey(const multimap<K,V>& source, K key)
+template <class K, class V>
+list<V> bykey(const multimap<K, V> &source, K key)
 {
-	vector<V> result;
-	
-	for(pair<K,V> item : source)
-		if(item.first == key)
-			result.push_back(item.second);
+	list<V> result;
+
+	for (typename map<K, V>::const_iterator it = source.find(key); it != source.end(); it++)
+	{
+		if (it->first != key)
+			return result;
+
+		result.push_front(it->second);
+	}
 
 	return result;
 }
