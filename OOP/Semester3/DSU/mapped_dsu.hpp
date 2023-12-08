@@ -16,148 +16,86 @@ namespace
 
 	public:
 		// В конструкторе не нужен размер, он будет увеличиваться по мере добавления элементов
-		mapped_dsu();
+		mapped_dsu() : dsu(0) {}
 
-		mapped_dsu(const mapped_dsu &other);
+		mapped_dsu(const mapped_dsu &other) : dsu(other),
+											  m_value(other.m_value),
+											  m_index(other.m_index) {}
 
 		// Создаёт множество {x} из элемента x
 		// Сохраняет новый индекс в хэш-таблицу по значению x с произвольным типом
 		// Записывает значение x по полученному индексу
-		void make_set(T x);
+		void make_set(const T &x)
+		{
+			typename std::unordered_map<T, int>::iterator it = m_index.find(x);
+
+			if (it != m_index.end())
+				return;
+
+			int index = static_cast<int>(m_parent.size());
+
+			m_parent.push_back(index);
+			m_value.push_back(x);
+			m_index.insert(std::pair<T, int>(x, index));
+		}
 
 		// Поиск лидера по значению
-		T find(T x);
+		// Уже проверено исключение
+		const T &find(const T &x) { return m_value[dsu::find(m_index.at(x))]; }
 
 		// То же без сжатия пути
-		T find(T x) const;
+		const T &find(const T &x) const { return m_value[dsu::find(m_index.at(x))]; }
 
 		// Сделать элемент y лидером множества {x}
 		// Причём происходит объеденение множеств {y} и {x}
-		void follow(T x, T y);
+		void follow(const T &x, const T &y) { dsu::follow(m_index.at(x), m_index.at(y)); };
 
 		// Проверка на содержание x и y в одном множестве
-		bool equal(T x, T y);
+		bool equal(const T &x, const T &y){dsu::equal(m_index.at(x), m_index.at(y))};
 
 		// То же без сжатия пути
-		bool equal(T x, T y) const;
+		bool equal(const T &x, const T &y) const {dsu::equal(m_index.at(x), m_index.at(y))};
 
-		void clear();
+		void clear()
+		{
+			dsu::clear();
 
-		// find() только через оператор
-		// Если элемента x нет в структуре, то создаёт его а затем возвращает его же как единственный его элемент подмножества {x}
-		T operator[](T x);
-
-		// То же самое без сжатия путей
-		const T &operator[](T x) const;
-
-		mapped_dsu &operator=(const mapped_dsu &other);
+			m_index.clear();
+			m_value.clear();
+		}
 
 		// Получения константной ссылки на значения внутри системы непересекающихся множеств
 		// Она недоступна к изменению. Пользуйся make_set
-		const std::vector<T> &values() const;
+		const std::vector<T> &values() const { return m_value; }
 
-		~mapped_dsu();
-	};
-
-	template <typename T>
-	mapped_dsu<T>::mapped_dsu() : dsu(0) {}
-
-	template <typename T>
-	mapped_dsu<T>::mapped_dsu(const mapped_dsu &other) : dsu(other)
-	{
-		m_value = other.m_value;
-		m_index = other.m_index;
-	}
-
-	template <typename T>
-	void mapped_dsu<T>::make_set(T x)
-	{
-		typename std::unordered_map<T, int>::iterator it = m_index.find(x);
-
-		if (it != m_index.end())
-			return;
-
-		int index = static_cast<int>(m_parent.size());
-
-		m_parent.push_back(index);
-		m_value.push_back(x);
-		m_index.insert(std::pair<T, int>(x, index));
-	}
-
-	template <typename T>
-	T mapped_dsu<T>::find(T x)
-	{
-		// Уже проверено исключение
-		return m_value[dsu::find(m_index.at(x))];
-	}
-
-	template <typename T>
-	T mapped_dsu<T>::find(T x) const
-	{
-		return m_value[dsu::find(m_index.at(x))];
-	}
-
-	template <typename T>
-	void mapped_dsu<T>::follow(T x, T y)
-	{
-		dsu::follow(m_index.at(x), m_index.at(y));
-	}
-
-	template <typename T>
-	bool mapped_dsu<T>::equal(T x, T y)
-	{
-		return dsu::equal(m_index.at(x), m_index.at(y));
-	}
-
-	template <typename T>
-	bool mapped_dsu<T>::equal(T x, T y) const
-	{
-		return dsu::equal(m_index.at(x), m_index.at(y));
-	}
-
-	template <typename T>
-	void mapped_dsu<T>::clear()
-	{
-		dsu::clear();
-
-		m_index.clear();
-		m_value.clear();
-	}
-
-	template <typename T>
-	const std::vector<T> &mapped_dsu<T>::values() const { return m_value; }
-
-	template <typename T>
-	T mapped_dsu<T>::operator[](T x)
-	{
-		typename std::unordered_map<T, int>::iterator it = m_index.find(x);
-
-		if (it == m_index.end())
+		// find() только через оператор
+		// Если элемента x нет в структуре, то создаёт его а затем возвращает его же как единственный его элемент подмножества {x}
+		T operator[](T x)
 		{
-			make_set(x);
-			return x;
+			typename std::unordered_map<T, int>::iterator it = m_index.find(x);
+
+			if (it == m_index.end())
+			{
+				make_set(x);
+				return x;
+			}
+
+			return m_value[dsu::find(it->second)];
 		}
 
-		return m_value[dsu::find(it->second)];
-	}
+		// То же самое без сжатия путей и без создания элемента в случае его отсутсвия
+		const T &operator[](const T &x) const { return m_value[dsu::find(m_index.at(x))]; }
 
-	template <typename T>
-	const T &mapped_dsu<T>::operator[](T x) const
-	{
-		return m_value[dsu::find(m_index.at(x))];
-	}
+		mapped_dsu &operator=(const mapped_dsu &other)
+		{
+			dsu::operator=(other);
 
-	template <typename T>
-	mapped_dsu<T> &mapped_dsu<T>::operator=(const mapped_dsu<T> &other)
-	{
-		dsu::operator=(other);
+			m_value = other.m_value;
+			m_index = other.m_index;
 
-		m_value = other.m_value;
-		m_index = other.m_index;
+			return *this;
+		}
 
-		return *this;
-	}
-
-	template <typename T>
-	mapped_dsu<T>::~mapped_dsu() {}
+		~mapped_dsu() {}
+	};
 }

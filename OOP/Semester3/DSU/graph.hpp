@@ -9,13 +9,13 @@ namespace
 		std::vector<bool> m_parity, m_bipartite;
 
 	public:
-		graph(size_t size) : m_components(size), m_parity(size), m_bipartite(size)
-		{
-			for(int i = 0;i < size;i++)
-			{
-				m_bipartite[i] = true;
-			}
-		}
+		graph(size_t size) : m_components(size),
+							 m_parity(size, 0),
+							 m_bipartite(size, true) {}
+
+		graph(const graph &other) : m_components(other.m_components),
+									m_parity(other.m_parity),
+									m_bipartite(other.m_bipartite) {}
 
 		void joint(int x, int y)
 		{
@@ -27,7 +27,16 @@ namespace
 
 		bool bipartite(int v)
 		{
-			return bipartite[find_set(v).first];
+			return m_bipartite[find_set(v).first];
 		}
+
+		graph &operator=(const graph &other)
+		{
+			m_components = other.m_components;
+			m_parity = other.m_parity;
+			m_bipartite = other.m_bipartite;
+		}
+
+		~graph() {}
 	};
 }

@@ -49,7 +49,7 @@ public:
 class dsu_2
 {
 public:
-	using component = std::list<int>;
+	using component = std::vector<int>;
 
 private:
 	std::list<component> m_component;
@@ -83,7 +83,7 @@ public:
 				if (*it2 == x)
 					foundX = true;
 				else if (*it2 == y)
-					foundY = false;
+					foundY = true;
 
 				if (foundX && foundY)
 					return true;
@@ -117,10 +117,12 @@ public:
 				if(itSetX->size() > itSetY->size())
 					std::swap(itSetX,itSetY);
 
-				for(int v : *itSetX)
-					itSetY->push_front(v);
+				itSetY->reserve(itSetY->size() + itSetX->size());
+				itSetY->insert(itSetY->end(),itSetX->begin(),itSetX->end());
 
 				m_component.erase(itSetX);
+
+				return;
 			}
 		}
 	}

@@ -4,7 +4,7 @@
 
 namespace
 {
-	// Дерево поиска наименьшего общего предка 
+	// Дерево поиска наименьшего общего предка
 	class lca
 	{
 	private:
@@ -44,27 +44,11 @@ namespace
 	};
 
 	lca::lca(size_t size) : m_class(size),
-							m_ancestor(size),
-							m_visited(size),
+							m_ancestor(size, -1),
+							m_visited(size, false),
 							m_component(size),
-							m_graph(size * size),
-							m_lca(size * size)
-	{
-		for (int i = 0; i < size; i++)
-		{
-			m_ancestor[i] = -1;
-			m_visited[i] = false;
-
-			for (int j = 0; i < size; i++)
-			{
-				m_graph[i * m_class.size() + j] = false;
-				m_graph[j * m_class.size() + i] = false;
-
-				m_lca[i * m_class.size() + j] = -1;
-				m_lca[j * m_class.size() + i] = -1;
-			}
-		}
-	}
+							m_graph(size * size, false),
+							m_lca(size * size, -1) {}
 
 	lca::lca(const lca &other) : m_class(other.m_class),
 								 m_ancestor(other.m_ancestor),
@@ -81,8 +65,7 @@ namespace
 		if (x == y || m_component.equal(x, y))
 			throw std::invalid_argument(""); // Появление цикла приводит к потере структуры дерева
 
-		m_graph[x * m_class.size() + y] = true;
-		m_graph[y * m_class.size() + x] = true;
+		m_graph[x * m_class.size() + y] = m_graph[y * m_class.size() + x] = true;
 
 		m_component.unite(x, y);
 	}
