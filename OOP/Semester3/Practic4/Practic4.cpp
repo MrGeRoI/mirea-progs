@@ -11,14 +11,13 @@ public:
 	struct Node
 	{
 	public:
-		int m_key, m_priority, m_value;
+		int m_key, m_priority;
 
 		// не можем хранить Node, но имеем право хранить указатель
 		Node *m_left, *m_right, *m_parent;
 
 		Node(int k, int p)
 		{
-			m_value = 0;
 			m_key = k;
 			m_priority = p;
 			m_left = m_right = m_parent = nullptr;
@@ -26,7 +25,6 @@ public:
 
 		Node(int k)
 		{
-			m_value = 0;
 			m_key = k;
 			m_priority = rand();
 			m_left = m_right = m_parent = nullptr;
@@ -34,7 +32,6 @@ public:
 
 		Node()
 		{
-			m_value = 0;
 			m_left = m_right = m_parent = nullptr;
 		}
 
@@ -130,7 +127,7 @@ public:
 			if (m_node == nullptr)
 				throw runtime_error("Invalid pointer");
 
-			return m_node->m_key;
+			return m_node->m_priority;
 		}
 
 		const int &operator*() const
@@ -138,23 +135,7 @@ public:
 			if (m_node == nullptr)
 				throw runtime_error("Invalid pointer");
 
-			return m_node->m_key;
-		}
-
-		int getPriority() const
-		{
-			if (m_node == nullptr)
-				throw runtime_error("Invalid pointer");
-
 			return m_node->m_priority;
-		}
-
-		int getKey() const
-		{
-			if (m_node == nullptr)
-				throw runtime_error("Invalid pointer");
-
-			return m_node->m_key;
 		}
 
 		Iterator &operator++()
@@ -347,8 +328,6 @@ protected:
 			left = right;
 		}
 
-		calculateMinimum(m_root);
-
 		return left;
 	}
 
@@ -380,8 +359,6 @@ protected:
 				node->m_left = m_root;
 			m_root = node;
 		}
-		
-		calculateMinimum(m_root);
 	}
 
 	// Переопределите разделение дерева split() так, чтобы оно работало по
@@ -390,9 +367,6 @@ protected:
 	{
 		if (m_root == nullptr || Current == nullptr)
 			return nullptr;
-
-		if(!Current->m_left)
-			return Current;
 
 		int leftSize = getSize(Current->m_left);
 
@@ -422,13 +396,20 @@ protected:
 			left.m_root->m_parent = nullptr;
 			return right.m_root;
 		}
-		
-		calculateMinimum(m_root);
 	}
 
-	Node *getMinimumOnSegment(Node *node, int start, int end) const
+	Node *getMinimumOnSegment(Node *node, int start, int end)
 	{
-		while(node->m_key)
+		ImplictTreap left, middle, right;
+		split(node, start, left, middle);
+		split(middle.m_root, end - start + 1, middle, right);
+
+		Node *minNode = middle.m_root->getMinimum();
+
+		// Объединяем деревья обратно
+		merge(left.m_root);
+		merge(middle.m_root);
+		merge(right.m_root);
 
 		return minNode;
 	}
@@ -446,17 +427,6 @@ protected:
 		return size;
 	}
 
-	void calculateMinimum(Node *node)
-	{
-		node->m_value = node->getMinimum()->m_priority;
-
-		if(node->m_right)
-			calculateMinimum(node->m_right);
-
-		if(node->m_left)
-			calculateMinimum(node->m_left);
-	}
-
 public:
 	int getSize() const
 	{
@@ -470,7 +440,7 @@ public:
 		return getSize(it.getNode());
 	}
 
-	Iterator getMaximumOnSegment(int start, int end)
+	Iterator getMinimumOnSegment(int start, int end)
 	{
 		return Iterator(getMinimumOnSegment(m_root, start, end));
 	}
@@ -549,22 +519,22 @@ int main()
 	ImplictTreap treap;
 
 	// Вставляем элементы в дерево с произвольными приоритетами
-	treap.merge(19, 1);
-	treap.merge(3, 2);
-	treap.merge(5, 3);
-	treap.merge(13, 4);
-	treap.merge(12, 5);
-	treap.merge(10, 6);
+	treap.merge(1, 5);
+	treap.merge(2, 2);
+	treap.merge(3, 8);
+	treap.merge(4, 1);
+	treap.merge(5, 7);
+	treap.merge(6, 3);
 
 	// Выводим дерево
 	std::cout << "Original Treap:\n"
 			  << treap << std::endl;
 
 	// Находим минимальный элемент на заданном отрезке
-	ImplictTreap::Iterator maxElement = treap.getMinimumOnSegment(2, 5);
+	ImplictTreap::Iterator minElement = treap.getMinimumOnSegment(2, 5);
 
 	// Выводим результат: 8
-	cout << "Minimum at [2;5]: " << *maxElement << endl;
+	cout << "Minimum at [2;5]: " << *minElement << endl;
 
 	return 0;
 }
