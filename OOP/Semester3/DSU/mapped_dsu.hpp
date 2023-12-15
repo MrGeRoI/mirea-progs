@@ -48,13 +48,13 @@ namespace
 
 		// Сделать элемент y лидером множества {x}
 		// Причём происходит объеденение множеств {y} и {x}
-		void follow(const T &x, const T &y) { dsu::follow(m_index.at(x), m_index.at(y)); };
+		void follow(const T &x, const T &y) { dsu::follow(m_index.at(x), m_index.at(y)); }
 
 		// Проверка на содержание x и y в одном множестве
-		bool equal(const T &x, const T &y){dsu::equal(m_index.at(x), m_index.at(y))};
+		bool equal(const T &x, const T &y) { return dsu::equal(m_index.at(x), m_index.at(y)); }
 
 		// То же без сжатия пути
-		bool equal(const T &x, const T &y) const {dsu::equal(m_index.at(x), m_index.at(y))};
+		bool equal(const T &x, const T &y) const { return dsu::equal(m_index.at(x), m_index.at(y)); }
 
 		void clear()
 		{

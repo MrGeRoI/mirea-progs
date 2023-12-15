@@ -2,6 +2,7 @@
 
 #include <stdexcept>
 #include <vector>
+#include <fstream>
 
 namespace
 {
@@ -101,7 +102,7 @@ namespace
 
 		// То же самое без сжатия путей
 		int operator[](int x) const { return find(x); }
-
+		
 		dsu &operator=(const dsu &other)
 		{
 			m_parent = other.m_parent;

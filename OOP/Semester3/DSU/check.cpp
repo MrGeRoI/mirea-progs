@@ -8,7 +8,7 @@
 #include "dermo.hpp"
 #include "unordered_dsu.hpp"
 
-#define TEST_N 2 // 1 2 3 4 5
+#define TEST_N 1 // 1 2 3 4 5
 
 using namespace std;
 
