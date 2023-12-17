@@ -22,10 +22,17 @@ public:
 	virtual const char *what() const noexcept { return "WrongVertexException"; };
 };
 
+class PrimeGraph;
+
+class KruskalGraph;
+
 // Класс неореинтированного незвешенного графа
 class Graph
 {
 public:
+	friend class PrimeGraph;
+	friend class KruskalGraph;
+
 	// Класс ребра
 	struct Edge
 	{
@@ -54,7 +61,7 @@ public:
 		}
 	};
 
-private:
+protected:
 	// Матрица смежности вершин графа
 	vector<vector<int>> _matrix;
 
@@ -156,117 +163,6 @@ public:
 		return path;
 	}
 
-	// Минимального остовное дерево на основе алгоритма Прима
-	// Возвращает: граф, описывающий это дерево
-	Graph getSpanningPrime() const
-	{
-		int vertices = _matrix.size();
-		Graph tree(vertices);
-
-		list<Edge> edges;					// рассматриваемые ребра
-		vector<bool> used(vertices, false); // использованные вершины
-
-		tree._matrix.resize(vertices);
-
-		used[0] = true; // Начнём с вершины 0.
-		for (int i = 0; i < vertices; i++)
-		{
-			if (_matrix[0][i] > 0)
-				edges.push_back(Edge(0, i));
-
-			tree._matrix[i].resize(vertices);
-		}
-
-		while (!edges.empty())
-		{
-			list<Edge>::iterator min_it = edges.begin(), it = edges.begin();
-
-			int min_weight = _matrix[it->_from][it->_to];
-
-			for (; it != edges.end(); it++)
-			{
-				int weight = _matrix[it->_from][it->_to];
-
-				if (weight != 0 && weight < min_weight)
-				{
-					min_it = it;
-					min_weight = weight;
-				}
-			}
-
-			Edge min_edge = *min_it;
-			edges.erase(min_it);
-
-			if (used[min_edge._to])
-				continue;
-
-			used[min_edge._to] = true;
-			tree._matrix[min_edge._from][min_edge._to] = _matrix[min_edge._from][min_edge._to];
-			tree._matrix[min_edge._to][min_edge._from] = _matrix[min_edge._to][min_edge._from];
-
-			for (int i = 0; i < vertices; i++)
-				if (_matrix[min_edge._to][i] > 0 && !used[i])
-					edges.push_back(Edge(min_edge._to, i));
-		}
-
-		return tree;
-	}
-
-	// Минимального остовное дерево на основе алгоритма Крускала
-	// Возвращает: граф, описывающий это дерево
-	Graph getSpanningKruskal() const
-	{
-		int vertices = _matrix.size();
-		Graph tree(vertices);
-
-		// Создаем приоритетную очередь для ребер, сортированную по весу
-		priority_queue<Edge, vector<Edge>, function<bool(Edge, Edge)>> pq(
-			[this](const Edge &a, const Edge &b)
-			{
-				return _matrix[a._from][a._to] > _matrix[b._from][b._to];
-			});
-
-		// Добавляем все ребра в приоритетную очередь
-		for (int i = 0; i < vertices; ++i)
-		{
-			for (int j = i + 1; j < vertices; ++j)
-			{
-				if (_matrix[i][j] > 0)
-					pq.push(Edge(i, j));
-			}
-		}
-
-		// Создаем вектор для хранения номера компонент связности
-		vector<int> component(vertices);
-
-		// Инициализируем каждую вершину отдельной компонентой
-		for (int i = 0; i < vertices; ++i)
-			component[i] = i;
-
-		// Проходим по приоритетной очереди и добавляем ребра в остовное дерево, если они не образуют цикл
-		while (!pq.empty())
-		{
-			Edge edge = pq.top();
-			pq.pop();
-
-			int componentFrom = component[edge._from];
-			int componentTo = component[edge._to];
-
-			// Если вершины ребра принадлежат разным компонентам связности, добавляем ребро в остовное дерево
-			if (componentFrom != componentTo)
-			{
-				tree._matrix[edge._from][edge._to] = tree._matrix[edge._to][edge._from] = _matrix[edge._from][edge._to];
-
-				// Объединяем компоненты связности
-				for (int i = 0; i < vertices; ++i)
-					if (component[i] == componentTo)
-						component[i] = componentFrom;
-			}
-		}
-
-		return tree;
-	}
-
 	// Получить количество вершин
 	int getVertices() const { return _matrix.size(); }
 
@@ -335,6 +231,144 @@ public:
 	~Graph() {}
 };
 
+class SpanningGraph : public Graph
+{
+public:
+	SpanningGraph(int vertices) : Graph(vertices) {}
+
+	SpanningGraph(SpanningGraph &graph) : Graph(graph) {}
+
+	virtual void makeSpanningTree(Graph &graph) const = 0;
+};
+
+class PrimeGraph : public SpanningGraph
+{
+public:
+	PrimeGraph(int vertices) : SpanningGraph(vertices) {}
+
+	PrimeGraph(PrimeGraph &graph) : SpanningGraph(graph) {}
+
+	// Минимального остовное дерево на основе алгоритма Прима
+	// Возвращает: граф, описывающий это дерево
+	virtual void makeSpanningTree(Graph &tree) const
+	{
+		int vertices = _matrix.size();
+
+		list<Edge> edges;					// рассматриваемые ребра
+		vector<bool> used(vertices, false); // использованные вершины
+
+		tree._matrix.resize(vertices);
+
+		used[0] = true; // Начнём с вершины 0.
+		for (int i = 0; i < vertices; i++)
+		{
+			if (_matrix[0][i] > 0)
+				edges.push_back(Edge(0, i));
+
+			tree._matrix[i].resize(vertices);
+		}
+
+		while (!edges.empty())
+		{
+			list<Edge>::iterator min_it = edges.begin(), it = edges.begin();
+
+			int min_weight = _matrix[it->_from][it->_to];
+
+			for (; it != edges.end(); it++)
+			{
+				int weight = _matrix[it->_from][it->_to];
+
+				if (weight != 0 && weight < min_weight)
+				{
+					min_it = it;
+					min_weight = weight;
+				}
+			}
+
+			Edge min_edge = *min_it;
+			edges.erase(min_it);
+
+			if (used[min_edge._to])
+				continue;
+
+			used[min_edge._to] = true;
+			tree._matrix[min_edge._from][min_edge._to] = _matrix[min_edge._from][min_edge._to];
+			tree._matrix[min_edge._to][min_edge._from] = _matrix[min_edge._to][min_edge._from];
+
+			for (int i = 0; i < vertices; i++)
+				if (_matrix[min_edge._to][i] > 0 && !used[i])
+					edges.push_back(Edge(min_edge._to, i));
+		}
+	};
+};
+
+class KruskalGraph : public SpanningGraph
+{
+protected:
+	using Graph::_matrix;
+
+public:
+	KruskalGraph(int vertices) : SpanningGraph(vertices) {}
+
+	KruskalGraph(KruskalGraph &graph) : SpanningGraph(graph) {}
+
+	// Минимального остовное дерево на основе алгоритма Крускала
+	// Возвращает: граф, описывающий это дерево
+	virtual void makeSpanningTree(Graph &tree) const
+	{
+		int vertices = _matrix.size();
+
+		// Создаем приоритетную очередь для ребер, сортированную по весу
+		priority_queue<Edge, vector<Edge>, function<bool(Edge, Edge)>> pq(
+			[this](const Edge &a, const Edge &b)
+			{
+				return _matrix[a._from][a._to] > _matrix[b._from][b._to];
+			});
+
+		tree._matrix.resize(vertices);
+
+		// Добавляем все ребра в приоритетную очередь
+		for (int i = 0; i < vertices; ++i)
+		{
+			tree._matrix[i].resize(vertices);
+
+			for (int j = i + 1; j < vertices; ++j)
+			{
+				if (_matrix[i][j] > 0)
+					pq.push(Edge(i, j));
+			}
+		}
+
+		// Создаем вектор для хранения номера компонент связности
+		vector<int> component(vertices);
+
+		// Инициализируем каждую вершину отдельной компонентой
+		for (int i = 0; i < vertices; ++i)
+			component[i] = i;
+
+		// Проходим по приоритетной очереди и добавляем ребра в остовное дерево, если они не образуют цикл
+		while (!pq.empty())
+		{
+			Edge edge = pq.top();
+			pq.pop();
+
+			int componentFrom = component[edge._from];
+			int componentTo = component[edge._to];
+
+			// Если вершины ребра принадлежат разным компонентам связности, добавляем ребро в остовное дерево
+			if (componentFrom != componentTo)
+			{
+				tree._matrix[edge._from][edge._to] = tree._matrix[edge._to][edge._from] = _matrix[edge._from][edge._to];
+
+				// Объединяем компоненты связности
+				for (int i = 0; i < vertices; ++i)
+					if (component[i] == componentTo)
+						component[i] = componentFrom;
+			}
+		}
+	};
+};
+
 int main(int argc, char *argv[])
 {
 	// Создаём граф на основе матрицы смежности
@@ -361,28 +395,36 @@ int main(int argc, char *argv[])
 
 	ifstream in_file("graph.txt");
 
-	Graph graph(13);
+	PrimeGraph primeGraph(13);
+	KruskalGraph kruskalGraph(13);
+
+	Graph primeTree(13), kruskalTree(13);
 
 	// Читаем граф из файла
-	in_file >> graph;
+	in_file >> primeGraph;
 
 	in_file.close();
 
+	in_file.open("graph.txt");
+
+	in_file >> kruskalGraph;
+
+	in_file.close();
 	// Выводим граф
-	cout << graph;
+	cout << primeGraph;
 
 	// Находим и выводим минимальное остовное дерево по алгоритму Прима
-	Graph prime = graph.getSpanningPrime();
+	primeGraph.makeSpanningTree(primeTree);
 	cout << "Prime:\n"
-		 << prime;
+		 << primeTree;
 
 	// Находим и выводим минимальное остовное дерево по алгоритму Крускала
-	Graph kruskal = graph.getSpanningKruskal();
+	kruskalGraph.makeSpanningTree(kruskalTree);
 	cout << "Kruskal:\n"
-		 << kruskal;
+		 << kruskalTree;
 
 	// Находим путь 0 -> 9
-	list<int> path = prime.findPath(0, 9);
+	list<int> path = primeTree.findPath(0, 9);
 
 	// Выводим путь
 	for (int v : path)

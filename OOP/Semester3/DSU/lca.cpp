@@ -6,29 +6,38 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-	lca a(100);
+	lca tree(100);
 
 	vector<pair<int, int>> query = {
-		{1, 4},
-		{2, 4},
-		{3, 4},
+		{5, 4},
+		{6, 4},
+		{7, 4},
 
-		{5, 1},
-		{6, 1},
+		{8, 1},
+		{9, 1},
 
-		{7, 2},
-		{8, 2},
+		{10, 2},
+		{11, 2},
 
-		{9, 3},
-		{10, 3}};
+		{12, 3},
+		{13, 3},
+
+		{1, 0},
+		{2, 0},
+		{3, 0},
+		{4, 0}};
 
 	for (pair<int, int> q : query)
 	{
 		cout << "Joint: " << q.first << ' ' << q.second << endl;
-		a.joint(q.first, q.second);
+		tree.joint(q.first, q.second);
 	}
 
-	cout << "LCA(5,9): " << a.find(5, 9) << endl;
+	tree.scan(0);
+
+	cout << "LCA(5,9): " << tree.find(5, 9) << endl;
+
+	cout << "LCA(8,9): " << tree.find(8, 9) << endl;
 
 	return 0;
 }

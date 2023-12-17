@@ -49,7 +49,7 @@ namespace
 
 		bool edge(int x, int y) const;
 
-		void scan();
+		void scan(int root);
 
 		int find(int x, int y);
 
@@ -71,7 +71,7 @@ namespace
 		return m_graph[x * m_class.size() + y];
 	}
 
-	void lca::scan()
+	void lca::scan(int root)
 	{
 		for (int i = 0; i < m_class.size(); i++)
 		{
@@ -79,9 +79,7 @@ namespace
 			m_ancestor[i] = -1;
 		}
 
-		for (int i = 0; i < m_class.size(); i++)
-			if (!m_visited[i])
-				dfs(i);
+		dfs(root);
 	}
 
 	void lca::dfs(int x)
@@ -108,13 +106,8 @@ namespace
 		if (x < 0 || x >= m_class.size() || y < 0 || y >= m_class.size())
 			throw std::out_of_range("");
 
-		if (m_visited[x] != m_visited[y])
+		if (!m_visited[x] || !m_visited[y])
 			return -1;
-
-		if (!m_visited[x])
-			dfs(x);
-		else if (!m_visited[y])
-			dfs(y);
 
 		return m_lca[x * m_class.size() + y];
 	}
